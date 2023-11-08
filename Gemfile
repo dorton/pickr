@@ -2,6 +2,18 @@ source "https://rubygems.org"
 
 ruby "3.2.2"
 
+gem "bootsnap", require: false
+
+gem "devise" 
+
+gem "httparty"
+
+gem 'vite_rails'
+
+gem "inertia_rails", "~> 3.0"
+# Brings Rails named routes to modern javascript (https://github.com/elmassimo/js_from_routes)
+gem "js_from_routes", "~> 2.0.4", group: :development
+
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
 gem "rails", "~> 7.1.1"
 

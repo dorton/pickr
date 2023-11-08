@@ -5,7 +5,7 @@ class CreateMatchups < ActiveRecord::Migration[7.1]
       t.string :sport_key
       t.string :sport_title
       t.datetime :commence_time
-      t.boolean :completed
+      t.boolean :completed, null: false, default: false
       t.string :home_team
       t.string :away_team
       t.datetime :remote_last_updated

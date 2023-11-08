@@ -3,7 +3,12 @@ class MatchupsController < ApplicationController
 
   # GET /matchups
   def index
-    @matchups = Matchup.all
+      @matchups = helpers.espnScores
+      @user = current_user
+      render inertia: "matchups/index", props: {
+        matchups: @matchups,
+        user: @user
+      }
   end
 
   # GET /matchups/1

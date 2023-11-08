@@ -1,0 +1,21 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  remote_id: MyString
+  title: MyString
+  last_update: 2023-11-06 16:33:48
+  market_type: MyString
+  name: MyString
+  price: MyString
+  point: MyString
+  point: MyString
+
+two:
+  remote_id: MyString
+  title: MyString
+  last_update: 2023-11-06 16:33:48
+  market_type: MyString
+  name: MyString
+  price: MyString
+  point: MyString
+  point: MyString

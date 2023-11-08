@@ -1,0 +1,19 @@
+{
+  "dependencies": {
+    "@inertiajs/vue3": "^1.0.14",
+    "@js-from-routes/client": "^1.0.4",
+    "@js-from-routes/inertia": "^1.10.2",
+    "@mdi/font": "^7.3.67",
+    "@vitejs/plugin-vue": "^4.4.0",
+    "axios": "^1.6.0",
+    "moment": "^2.29.4",
+    "vite-plugin-full-reload": "^1.0.5",
+    "vite-plugin-vuetify": "^1.0.2",
+    "vue": "^3.3.8",
+    "vuetify": "^3.3.16"
+  },
+  "devDependencies": {
+    "vite": "^4.3.0",
+    "vite-plugin-ruby": "^3.2.0"
+  }
+}
