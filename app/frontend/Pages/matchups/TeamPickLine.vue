@@ -48,7 +48,7 @@
 <script>
 import moment from 'moment'
 export default {
-    props: ['game', 'picks', 'week', 'saved_game', 'admin_override'],
+    props: ['remote_game', 'picks', 'week', 'saved_game', 'admin_override', 'user'],
     data() {
         return {
             confidence_selections: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
@@ -60,21 +60,21 @@ export default {
     },
     created () {
         if (this.picks.length > 0) {
-            let pick = this.picks.find(p => p.game_id.toString() === this.game.id.toString())
+            let pick = this.picks.find(p => p.remote_game_id.toString() === this.remote_game.id.toString())
             if (pick) {
                 this.pick_id = pick.id
-                this.team_id = pick.team_id.toString()
+                this.team_id = pick.remote_team_id.toString()
                 this.confidence = pick.confidence
             }
         }
     },
     watch: {
         confidence(v) {
-            let out = {id: this.pick_id, week: this.week, game_id: this.game.id, confidence: v, team_id: this.team_id }
+            let out = {id: this.pick_id, week: this.week, remote_game_id: this.remote_game.id, confidence: v, remote_team_id: this.team_id, user_id: this.user.id, game_id: this.saved_game.id }
             this.$emit('confChange', out)
         },
         team_id(v) {
-            let out = {id: this.pick_id, week: this.week, game_id: this.game.id, confidence: this.confidence, team_id: v }
+            let out = {id: this.pick_id, week: this.week, remote_game_id: this.remote_game.id, confidence: this.confidence, remote_team_id: v, user_id: this.user.id, game_id: this.saved_game.id }
             this.$emit('confChange', out)
         }
     },
@@ -148,31 +148,31 @@ export default {
             return this.picks.map(fp => fp.confidence)
         },
         otherPicks() {
-            return this.picks.filter(p => p.game_id.toString() !== this.game.id.toString()).map(fp => fp.confidence)
+            return this.picks.filter(p => p.remote_game_id.toString() !== this.remote_game.id.toString()).map(fp => fp.confidence)
         },
         pickTaken() {
             return this.otherPicks.includes(this.confidence)
         },
         hasPick() {
-            return this.picks.find(p => p.game_id.toString() === this.game.id.toString()) || false
+            return this.picks.find(p => p.game_id.toString() === this.remote_game.id.toString()) || false
         },
         gameOdds() {
-            // return this.game.competitions[0].odds[0].details
+            // return this.remote_game.competitions[0].odds[0].details
             return this.saved_game.odds
 
         },
         gameStation() {
-            let comps = this.game.competitions[0]
+            let comps = this.remote_game.competitions[0]
             return comps.broadcasts && comps.broadcasts[0] && comps.broadcasts[0].names ? comps.broadcasts[0].names[0] : ''
         },
         gameTime() {
-            return moment(this.game.competitions[0].date).format('h:mma')
+            return moment(this.remote_game.competitions[0].date).format('h:mma')
         },
         gameCompleted() {
-            return this.game.status.type.completed
+            return this.remote_game.status.type.completed
         },
         gameState() {
-            return this.game.status.type.state
+            return this.remote_game.status.type.state
         },
         shouldDisableSelect() {
             if (this.admin_override) {
@@ -222,10 +222,10 @@ export default {
             return this.otherPicks.includes(item.value) ? 'blue-accent-4' : ''
         },
         getTeamById(id) {
-            return this.game.competitions[0].competitors.find(c => c.id.toString() === id.toString())
+            return this.remote_game.competitions[0].competitors.find(c => c.id.toString() === id.toString())
         },
         getTeam(homeAway) {
-            return this.game.competitions[0].competitors.find(c => c.homeAway === homeAway)
+            return this.remote_game.competitions[0].competitors.find(c => c.homeAway === homeAway)
         },
         getScore(homeAway) {
             return this.getTeam(homeAway).score
@@ -282,7 +282,7 @@ export default {
 
 .confidence {
     padding-top: 3px;
-    max-width: 80px;
+    max-width: 85px;
 }
 
 .game-info {

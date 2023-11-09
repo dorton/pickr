@@ -15,13 +15,21 @@ class PicksController < ApplicationController
 
   # POST /picks
   def create
-    @pick = Pick.upsert_all(params[:pick])
-    
+    @picks = Pick.upsert_all(params[:pick])
+    @group = Group.find(params[:group][:id])
 
-    if @pick
+    if @picks
+      arr =  @picks.rows.map{|r| r.first}
+      @picks.rows.each do |row|
+        row.each do |id|
+          pick = Pick.find(id)
+          group_picks = @group.picks
+          group_picks << pick unless group_picks.include? pick
+        end
+      end
       render json: {status: :created}
     else
-      render json: @pick.errors, status: :unprocessable_entity
+      render json: @picks.errors, status: :unprocessable_entity
     end
   end
 

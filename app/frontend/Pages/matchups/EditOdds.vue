@@ -35,7 +35,7 @@ export default {
             return this.odds !== null && this.favored_team_id !== null
         },
         saved_game() {
-            return this.saved_games.find(g => g.game_id.toString() === this.game.id) 
+            return this.saved_games.find(g => g.remote_game_id.toString() === this.game.id) 
         },
         teams() {
             return this.game.competitions[0].competitors.map(c => c.team)

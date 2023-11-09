@@ -15,9 +15,11 @@ class GamesController < ApplicationController
 
   # POST /games
   def create
+    @group = Group.find(params[:group][:id])
     @game = Game.new(game_params)
 
     if @game.save
+      @group.games << @game
       render json: @game, status: :created, location: @game
     else
       render json: @game.errors, status: :unprocessable_entity
@@ -42,11 +44,11 @@ class GamesController < ApplicationController
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_game
-      @game = Game.find_by_game_id(params[:id])
+      @game = Game.find_by_remote_game_id(params[:id])
     end
 
     # Only allow a list of trusted parameters through.
     def game_params
-      params.require(:game).permit(:week, :game_id, :set_odds, :favored_team_id, :odds)
+      params.require(:game).permit(:week, :remote_game_id, :set_odds, :favored_team_id, :odds)
     end
 end

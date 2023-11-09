@@ -10,6 +10,11 @@
     <v-navigation-drawer location="right" v-model="drawer" temporary>
 
       <v-list-item>
+        <div class="d-flex align-content-center justify-center">
+          <div>{{user.username}}</div>
+        </div>
+      </v-list-item>
+      <v-list-item>
         <v-btn block @click="signOut">
           Logout
         </v-btn>
@@ -22,7 +27,7 @@
         </v-list-item>
         <v-divider></v-divider>
         <v-list-item v-if="weekly_games.length > 0" title="Current Games"></v-list-item>
-        <v-list-item v-for="game in weekly_games" :key="game.game_id">
+        <v-list-item v-for="game in weekly_games" :key="game.remote_game_id">
           <v-card variant="tonal">
             <v-card-title>
               {{ getTeamName('away', game) }} {{ getTeamRank('away', game) }} @ {{ getTeamName('home', game) }}
@@ -80,8 +85,8 @@
             </v-card-title>
             <v-card flat color="grey-lighten-4">
               <v-card-text>
-                <TeamPickLine v-for="game in weekly_games" :key="game.id" :game="game" :picks="weekly_picks"
-                  @confChange="setConf" :week="handleWeek" :saved_game="getSavedGame(game)" :admin_override="admin_override" />
+                <TeamPickLine v-for="game in weekly_games" :key="game.id" :remote_game="game" :picks="weekly_picks"
+                  @confChange="setConf" :week="handleWeek" :saved_game="getSavedGame(game)" :admin_override="admin_override" :user="user" />
               </v-card-text>
             </v-card>
           </v-col>
@@ -102,7 +107,7 @@ import { Link } from '@inertiajs/vue3'
 import TeamPickLine from './TeamPickLine.vue'
 import EditOdds from './EditOdds.vue'
 export default {
-  props: ['matchups', 'user', 'week', 'saved_picks', 'saved_games'],
+  props: ['matchups', 'user', 'week', 'saved_picks', 'saved_games', 'current_group', 'current_week', 'users'],
   components: {
     Link,
     TeamPickLine,
@@ -123,6 +128,7 @@ export default {
     }
   },
   created() {
+    this.checkUrl()
     if (this.saved_picks && this.saved_picks.length > 0) {
       this.saved_picks.forEach(pick => {
         if (!this.gameInConf(pick)) {
@@ -132,9 +138,11 @@ export default {
     }
     if (this.saved_games && this.mappedGames.length > 0) {
       this.mappedGames.forEach(id => {
-        let game = this.matchups.events.find(e => e.id === id.toString())
-        if (game && !this.gameInWeek(game)) {
-          this.weekly_games.push(game)
+        if (id) {
+          let game = this.matchups.events.find(e => e ? e.id === id.toString() : false)
+          if (game && !this.gameInWeek(game)) {
+            this.weekly_games.push(game)
+          }
         }
       })
     }
@@ -142,7 +150,7 @@ export default {
   computed: {
     mappedGames() {
       if (this.saved_games) {
-        return this.saved_games.map(g => g.game_id)
+        return this.saved_games.map(g => g.remote_game_id)
       } 
       return []
     },
@@ -172,10 +180,16 @@ export default {
     }
   },
   methods: {
+    checkUrl() {
+      let params = window.location.search
+      if (params === '?force') {
+        this.admin_override = true
+      }
+    },
     navWeeks(direction) {
       let diff = direction === 'back' ? -1 : 1
       let week = parseInt(this.handleWeek) + diff
-      window.location = `/matchups/${week}`
+      window.location = `/${this.current_group.slug}/week_${week}/picks`
     },
     currentOdds(matchup) {
       let comps = matchup.competitions
@@ -188,10 +202,10 @@ export default {
       return 'No Current Odds'
     },
     getSavedGame(game) {
-      return this.saved_games.find(g => g.game_id.toString() === game.id.toString())
+      return this.saved_games.find(g => g.remote_game_id.toString() === game.id.toString())
     },
     handleSubmit() {
-      axios.post('/picks', { pick: this.weekly_picks }, this.config).then(r => {
+      axios.post('/picks', { pick: this.weekly_picks, group: this.current_group }, this.config).then(r => {
         console.log(r);
       })
     },
@@ -199,7 +213,7 @@ export default {
       return this.getConfIndex(pick) > -1
     },
     getConfIndex(pick) {
-      return this.weekly_picks.findIndex(g => g.game_id.toString() === pick.game_id.toString())
+      return this.weekly_picks.findIndex(g => g.remote_game_id.toString() === pick.remote_game_id.toString())
     },
     setConf(pick) {
       if (!this.gameInConf(pick)) {
@@ -235,15 +249,17 @@ export default {
       })
     },
     addGame(game) {
-      let data = { game: { week: this.handleWeek, game_id: game.id, set_odds: null } }
-      console.log('data: ', data);
-      axios.post('/games', data, this.config).then(r => {
-        console.log('response: ', r.data);
-        if (!this.gameInWeek(game) && this.weekly_games.length < 10) {
-          this.weekly_games.push(game)
-        }
-
-      })
+      if (this.weekly_games.length < 10) {
+        let data = { game: { week: this.handleWeek, remote_game_id: game.id, set_odds: null }, group: this.current_group }
+        console.log('data: ', data);
+        axios.post('/games', data, this.config).then(r => {
+          console.log('response: ', r.data);
+          if (!this.gameInWeek(game) && this.weekly_games.length < 10) {
+            this.weekly_games.push(game)
+          }
+  
+        })
+      }
     },
     signOut() {
       axios.delete('/users/sign_out', this.config).then(() => {

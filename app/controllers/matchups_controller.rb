@@ -8,6 +8,7 @@ class MatchupsController < ApplicationController
       @user = current_user
       render inertia: "matchups/index", props: {
         matchups: @matchups,
+        current_week: @week,
         user: @user,
         week: @week,
         saved_picks: Pick.where(week: @week.first.value).where(user_id: current_user.id),
@@ -17,11 +18,12 @@ class MatchupsController < ApplicationController
 
   # GET /matchups/:week
   def show
-    @week = params[:id]
+    @week = params[:id].split('week_').last
     @matchups = helpers.espnScores(@week)
     @user = current_user
       render inertia: "matchups/index", props: {
         matchups: @matchups,
+        current_week: current_week,
         user: @user,
         week: @week,
         saved_picks: Pick.where(week: @week).where(user_id: current_user.id),
