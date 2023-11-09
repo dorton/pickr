@@ -10,7 +10,28 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2023_11_07_145024) do
+ActiveRecord::Schema[7.1].define(version: 2023_11_09_012141) do
+  create_table "calendars", force: :cascade do |t|
+    t.string "label"
+    t.string "alternateLabel"
+    t.string "detail"
+    t.string "value"
+    t.datetime "startDate"
+    t.datetime "endDate"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "games", force: :cascade do |t|
+    t.integer "week"
+    t.integer "game_id"
+    t.integer "set_odds"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "favored_team_id"
+    t.float "odds"
+  end
+
   create_table "matchups", force: :cascade do |t|
     t.string "remote_id"
     t.string "sport_key"
@@ -36,6 +57,16 @@ ActiveRecord::Schema[7.1].define(version: 2023_11_07_145024) do
     t.string "point"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "picks", force: :cascade do |t|
+    t.integer "week"
+    t.integer "game_id"
+    t.integer "confidence"
+    t.integer "team_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "user_id"
   end
 
   create_table "users", force: :cascade do |t|

@@ -1,8 +1,7 @@
 module MatchupsHelper
 
-    def espnScores(start=Date.today.beginning_of_week, dend=Date.today.end_of_week)
-        # url = "https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard?dates=#{start.strftime('%Y%m%d')}-#{dend.strftime('%Y%m%d')}"
-        url = "https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard?week=11&groups=80"
+    def espnScores(week)
+        url = "https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard?week=#{week}&groups=80"
         games = HTTParty.get(url)
     end
 

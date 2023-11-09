@@ -1,0 +1,17 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  label: MyString
+  alternateLabel: MyString
+  detail: MyString
+  value: MyString
+  startDate: 2023-11-08 07:41:44
+  endDate: 2023-11-08 07:41:44
+
+two:
+  label: MyString
+  alternateLabel: MyString
+  detail: MyString
+  value: MyString
+  startDate: 2023-11-08 07:41:44
+  endDate: 2023-11-08 07:41:44

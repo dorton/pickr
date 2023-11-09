@@ -1,18 +1,32 @@
 class MatchupsController < ApplicationController
-  before_action :set_matchup, only: %i[ show edit update destroy ]
+  before_action :set_matchup, only: %i[ edit update destroy ]
 
   # GET /matchups
   def index
-      @matchups = helpers.espnScores
+      @week = current_week
+      @matchups = helpers.espnScores(@week.first.value)
       @user = current_user
       render inertia: "matchups/index", props: {
         matchups: @matchups,
-        user: @user
+        user: @user,
+        week: @week,
+        saved_picks: Pick.where(week: @week.first.value).where(user_id: current_user.id),
+        saved_games: Game.where(week: @week.first.value)
       }
   end
 
-  # GET /matchups/1
+  # GET /matchups/:week
   def show
+    @week = params[:id]
+    @matchups = helpers.espnScores(@week)
+    @user = current_user
+      render inertia: "matchups/index", props: {
+        matchups: @matchups,
+        user: @user,
+        week: @week,
+        saved_picks: Pick.where(week: @week).where(user_id: current_user.id),
+        saved_games: Game.where(week: @week)
+      }
   end
 
   # GET /matchups/new
@@ -51,6 +65,10 @@ class MatchupsController < ApplicationController
   end
 
   private
+    def current_week
+      Calendar.where('? BETWEEN startDate AND endDate', Date.today)
+    end
+
     # Use callbacks to share common setup or constraints between actions.
     def set_matchup
       @matchup = Matchup.find(params[:id])

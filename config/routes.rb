@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  resources :picks
+  resources :games
   devise_for :users
   resources :matchups
   root "matchups#index"
