@@ -13,7 +13,10 @@ class HomeController < ApplicationController
           week: @week,
           saved_picks: @group.picks.where(week: @week),
           saved_games: @group.games.where(week: @week),
-          current_group: @group
+          current_group: @group,
+          user_groups: current_user.groups,
+          current_calendar: current_week.first,
+          calendars: Calendar.all
         }
   
       
@@ -32,7 +35,10 @@ class HomeController < ApplicationController
                 week: @week,
                 saved_picks: @group.picks.where(week: @week).where(user_id: current_user.id),
                 saved_games: @group.games.where(week: @week),
-                current_group: @group
+                current_group: @group,
+                user_groups: current_user.groups,
+                current_calendar: current_week.first,
+                calendars: Calendar.all
             }    
         else
             redirect_to root_url

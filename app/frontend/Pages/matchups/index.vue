@@ -1,103 +1,26 @@
 <template>
-  <v-layout>
-    <v-app-bar :elevation="2">
-      <v-app-bar-title>Pickr</v-app-bar-title>
-      <v-spacer></v-spacer>
-      <v-btn icon>
-        <v-icon @click="drawer = !drawer">mdi-cog</v-icon>
-      </v-btn>
-    </v-app-bar>
-    <v-navigation-drawer location="right" v-model="drawer" temporary>
-
-      <v-list-item>
-        <div class="d-flex align-content-center justify-center">
-          <div>{{user.username}}</div>
-        </div>
-      </v-list-item>
-      <v-list-item>
-        <v-btn block @click="signOut">
-          Logout
-        </v-btn>
-      </v-list-item>
-      <span v-if="user.username === 'dorktron'">
-        <v-list-item>
-          <v-btn block @click="admin_override = !admin_override">
-            {{ admin_override ? 'Lock' : 'Unlock' }}
-          </v-btn>
-        </v-list-item>
-        <v-divider></v-divider>
-        <v-list-item v-if="weekly_games.length > 0" title="Current Games"></v-list-item>
-        <v-list-item v-for="game in weekly_games" :key="game.remote_game_id">
-          <v-card variant="tonal">
-            <v-card-title>
-              {{ getTeamName('away', game) }} {{ getTeamRank('away', game) }} @ {{ getTeamName('home', game) }}
-              {{
-                getTeamRank('home', game) }}
-            </v-card-title>
-            <v-card-subtitle>
-              {{ handleDate(game) }}
-            </v-card-subtitle>
+    <v-container>
+      <v-row>
+        <v-col>
+          <v-card-title>
+            <div class="title-wrapper">
+              <div class="title">My Picks</div>
+              <div class="submit" v-if="canSubmit"><v-btn :loading="loading" color="success" @click="handleSubmit()">{{button_text}}</v-btn></div>
+            </div>
+          </v-card-title>
+          <v-card flat color="grey-lighten-4">
             <v-card-text>
-              {{ currentOdds(game) }}
-              <EditOdds :game="game" :saved_games="saved_games" :config="config" />
+              <TeamPickLine v-for="game in weekly_games" :key="game.id" :remote_game="game" :picks="weekly_picks"
+                @confChange="setConf" :week="handleWeek" :saved_game="getSavedGame(game)" :admin_override="admin_override" :user="user" />
             </v-card-text>
-            <v-card-actions>
-              <v-btn color="indigo-darken-3" @click="manageWeeklyGames(game)">
-                {{ getAddGameText(game) }}
-              </v-btn>
-            </v-card-actions>
           </v-card>
-        </v-list-item>
-        <v-divider></v-divider>
-        <v-list-item title="All Games">
-        </v-list-item>
-        <v-list-item v-for="matchup in events" :key="matchup.id">
-          <v-card variant="tonal">
-            <v-card-title>
-              {{ getTeamName('away', matchup) }} {{ getTeamRank('away', matchup) }} @ {{ getTeamName('home', matchup) }}
-              {{
-                getTeamRank('home', matchup) }}
-            </v-card-title>
-            <v-card-subtitle>
-              {{ handleDate(matchup) }}
-            </v-card-subtitle>
-            <v-card-text>
-              {{ currentOdds(matchup) }}
-            </v-card-text>
-            <v-card-actions>
-              <v-btn color="indigo-darken-3" @click="manageWeeklyGames(matchup)">
-                {{ getAddGameText(matchup) }}
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-list-item>
-      </span>
-    </v-navigation-drawer>
-    <v-main>
-      <v-container>
-        <v-row>
-          <v-col>
-            <v-card-title>
-              <div class="title-wrapper">
-                <div class="title">My Picks</div>
-                <div class="submit" v-if="canSubmit"><v-btn color="success" @click="handleSubmit()">Submit</v-btn></div>
-              </div>
-            </v-card-title>
-            <v-card flat color="grey-lighten-4">
-              <v-card-text>
-                <TeamPickLine v-for="game in weekly_games" :key="game.id" :remote_game="game" :picks="weekly_picks"
-                  @confChange="setConf" :week="handleWeek" :saved_game="getSavedGame(game)" :admin_override="admin_override" :user="user" />
-              </v-card-text>
-            </v-card>
-          </v-col>
-        </v-row>
-        <v-row class="d-flex justify-space-between">
-          <div class="pa-3 clicky" @click="navWeeks('back')">previous</div>
-          <div class="pa-3 clicky" @click="navWeeks('forward')">next</div>
-        </v-row>
-      </v-container>
-    </v-main>
-  </v-layout>
+        </v-col>
+      </v-row>
+      <v-row class="d-flex justify-space-between">
+        <Link :href="navWeeks('back')">previous</Link>
+        <Link :href="navWeeks('forward')">next</Link>
+      </v-row>
+    </v-container>
 </template>
   
 <script>
@@ -105,53 +28,56 @@ import axios from 'axios'
 import moment from 'moment'
 import { Link } from '@inertiajs/vue3'
 import TeamPickLine from './TeamPickLine.vue'
-import EditOdds from './EditOdds.vue'
+import { mapState } from 'vuex'
 export default {
-  props: ['matchups', 'user', 'week', 'saved_picks', 'saved_games', 'current_group', 'current_week', 'users'],
+  props: ['matchups', 'user', 'week', 'current_group', 'current_week', 'users', 'saved_games', 'saved_picks'],
   components: {
     Link,
     TeamPickLine,
-    EditOdds
   },
   data() {
     return {
-      admin_override: false,
+      loading: false,
+      button_text: "Submit",
+      // admin_override: false,
       drawer: false,
-      weekly_games: [],
-      weekly_picks: [],
-      config: {
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRF-Token": document.querySelector("meta[name='csrf-token']").content,
-        }
-      }
+      // weekly_games: [],
+      // weekly_picks: [],
+      // config: {
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //     "X-CSRF-Token": document.querySelector("meta[name='csrf-token']").content,
+      //   }
+      // }
     }
   },
   created() {
-    this.checkUrl()
     if (this.saved_picks && this.saved_picks.length > 0) {
+      this.$store.commit('setWeeklyPicks', []) 
       this.saved_picks.forEach(pick => {
         if (!this.gameInConf(pick)) {
-          this.weekly_picks.push(pick)
+          this.$store.commit('pushWeeklyPicks', pick)
         }
       })
     }
     if (this.saved_games && this.mappedGames.length > 0) {
+      this.$store.commit('setWeeklyGames', [])
       this.mappedGames.forEach(id => {
         if (id) {
           let game = this.matchups.events.find(e => e ? e.id === id.toString() : false)
           if (game && !this.gameInWeek(game)) {
-            this.weekly_games.push(game)
+            this.$store.commit('pushWeeklyGames', game)
           }
         }
       })
     }
   },
   computed: {
+    ...mapState(['admin_override', 'weekly_games', 'weekly_picks', 'config']),
     mappedGames() {
       if (this.saved_games) {
         return this.saved_games.map(g => g.remote_game_id)
-      } 
+      }
       return []
     },
     noDups() {
@@ -180,16 +106,16 @@ export default {
     }
   },
   methods: {
-    checkUrl() {
-      let params = window.location.search
-      if (params === '?force') {
-        this.admin_override = true
-      }
-    },
+    // checkUrl() {
+    //   let params = window.location.search
+    //   if (params === '?force') {
+    //     this.admin_override = true
+    //   }
+    // },
     navWeeks(direction) {
       let diff = direction === 'back' ? -1 : 1
       let week = parseInt(this.handleWeek) + diff
-      window.location = `/${this.current_group.slug}/week_${week}/picks`
+      return `/${this.current_group.slug}/week_${week}/picks`
     },
     currentOdds(matchup) {
       let comps = matchup.competitions
@@ -205,8 +131,13 @@ export default {
       return this.saved_games.find(g => g.remote_game_id.toString() === game.id.toString())
     },
     handleSubmit() {
+      this.loading = true
       axios.post('/picks', { pick: this.weekly_picks, group: this.current_group }, this.config).then(r => {
-        console.log(r);
+        if (r.statusText === 'OK') {
+          this.button_text = "Updated"
+          this.loading = false
+        }
+
       })
     },
     gameInConf(pick) {
@@ -216,10 +147,11 @@ export default {
       return this.weekly_picks.findIndex(g => g.remote_game_id.toString() === pick.remote_game_id.toString())
     },
     setConf(pick) {
+      this.button_text = "Submit"
       if (!this.gameInConf(pick)) {
-        this.weekly_picks.push(pick)
+        this.$store.commit('pushWeeklyPicks', pick)
       } else {
-        this.weekly_picks.splice(this.getConfIndex(pick), 1, pick)
+        this.$store.commit('spliceWeeklyPicks', {pick: pick, index: this.getConfIndex(pick)})
       }
     },
     manageWeeklyGames(game) {
@@ -261,11 +193,7 @@ export default {
         })
       }
     },
-    signOut() {
-      axios.delete('/users/sign_out', this.config).then(() => {
-        window.location.reload();
-      })
-    },
+    
     getTeam(homeAway, matchup) {
       return matchup.competitions[0].competitors.find(c => c.homeAway === homeAway)
     },

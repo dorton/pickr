@@ -1,5 +1,5 @@
 <template>
-    <v-row dense align="center" align-content="space-around">
+    <v-row dense align="center" align-content="space-around" v-if="saved_game">
         <v-col>
             <div :class="['team', {'team-selected': isSelected('away')}]" @click="setSelection('away')">
                 <div class="team-rank mx-1">{{ getTeamRank('away') }}</div>
@@ -59,6 +59,7 @@ export default {
         }
     },
     created () {
+        console.log('running created function in TeamPickLine');
         if (this.picks.length > 0) {
             let pick = this.picks.find(p => p.remote_game_id.toString() === this.remote_game.id.toString())
             if (pick) {
@@ -70,12 +71,16 @@ export default {
     },
     watch: {
         confidence(v) {
-            let out = {id: this.pick_id, week: this.week, remote_game_id: this.remote_game.id, confidence: v, remote_team_id: this.team_id, user_id: this.user.id, game_id: this.saved_game.id }
-            this.$emit('confChange', out)
+            if (this.saved_game) {
+                let out = {id: this.pick_id, week: this.week, remote_game_id: this.remote_game.id, confidence: v, remote_team_id: this.team_id, user_id: this.user.id, game_id: this.saved_game.id }
+                this.$emit('confChange', out)
+            }
         },
         team_id(v) {
-            let out = {id: this.pick_id, week: this.week, remote_game_id: this.remote_game.id, confidence: this.confidence, remote_team_id: v, user_id: this.user.id, game_id: this.saved_game.id }
-            this.$emit('confChange', out)
+            if (this.saved_game) {
+                let out = {id: this.pick_id, week: this.week, remote_game_id: this.remote_game.id, confidence: this.confidence, remote_team_id: v, user_id: this.user.id, game_id: this.saved_game.id }
+                this.$emit('confChange', out)
+            }
         }
     },
     computed: {

@@ -1,17 +1,88 @@
 <template>
-  <div></div>
+  <v-layout>
+    <v-app-bar :elevation="2">
+      <v-app-bar-title>
+        <Link href="/">Pickr</Link>
+      </v-app-bar-title>
+      <v-spacer></v-spacer>
+      <v-btn icon>
+        <v-icon @click="drawer = !drawer">mdi-cog</v-icon>
+      </v-btn>
+    </v-app-bar>
+    <v-navigation-drawer location="right" v-model="drawer" temporary>
+      <v-list-item>
+        <div class="d-flex align-content-center justify-center">
+          <div>{{ user.username }}</div>
+        </div>
+      </v-list-item>
+      <v-list-item>
+        <v-btn block @click="signOut">
+          Logout
+        </v-btn>
+      </v-list-item>
+      <AdminGames v-if="user.is_admin" :week="week" :current_group="current_group" :matchups="matchups"
+        :saved_games="saved_games" />
+    </v-navigation-drawer>
+    <v-main>
+      <slot></slot>
+    </v-main>
+  </v-layout>
 </template>
 
 <script>
+import AdminGames from './AdminGames.vue'
+import { Link } from '@inertiajs/vue3'
+import { mapState } from 'vuex'
+import { router } from '@inertiajs/vue3'
 export default {
-  name: "Test",
-  created() {},
-  data() {
-    return {};
+  name: "Main Layout",
+  components: {
+    Link,
+    AdminGames
   },
-  props: {},
-  methods: {},
+  created() {
+
+    router.on('start', (event) => {
+      console.log(`Starting a visit to ${event.detail.visit.url}`)
+      this.checkUrl()
+    })
+    
+  },
+  data() {
+    return {
+      drawer: false
+    };
+  },
+  props: ['matchups', 'user', 'saved_games', 'saved_picks', 'current_group', 'week'],
+  computed: {
+    ...mapState(['weekly_picks', 'weekly_games', 'admin_override']),
+  },
+  methods: {
+    signOut() {
+      axios.delete('/users/sign_out', this.config).then(() => {
+        window.location.reload();
+      })
+    },
+    checkUrl() {
+      let params = window.location.search
+      if (params === '?force') {
+        this.$store.commit('setAdminOverride', true)
+      }
+    },
+    gmIndex(game) {
+      return this.weekly_games.findIndex(g => g.id === game.id)
+    },
+    gameInWeek(game) {
+      return this.gmIndex(game) > -1
+    },
+    gameInConf(pick) {
+      return this.getConfIndex(pick) > -1
+    },
+    getConfIndex(pick) {
+      return this.weekly_picks.findIndex(g => g.remote_game_id.toString() === pick.remote_game_id.toString())
+    },
+  },
 };
 </script>
 
-<style lang="scss" scoped></style>
+<style></style>

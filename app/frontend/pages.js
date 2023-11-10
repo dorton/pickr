@@ -1,5 +1,5 @@
 // NOTE: Optimize the SSR bundle by not splitting by page.
-// import Layout from "./Layouts/Main.vue"; // This line
+import Layout from "./Layouts/Main.vue"; // This line
 const pages = import.meta.env.SSR
   ? import.meta.globEagerDefault("./Pages/**/*.vue", { eager: true })
   : import.meta.glob("./Pages/**/*.vue", { eager: true });
@@ -13,6 +13,6 @@ export async function resolvePage(name) {
     );
   }
 
-  // page.default.layout = page.default.layout || Layout; // This line
+  page.default.layout = page.default.layout || Layout; // This line
   return import.meta.env.SSR ? page : (await page).default;
 }

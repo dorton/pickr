@@ -27,7 +27,7 @@ class PicksController < ApplicationController
           group_picks << pick unless group_picks.include? pick
         end
       end
-      render json: {status: :created}
+      render json: {status: :success}
     else
       render json: @picks.errors, status: :unprocessable_entity
     end
