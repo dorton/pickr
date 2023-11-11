@@ -12,7 +12,6 @@ export async function resolvePage(name) {
       `Unknown page ${name}. Is it located under Pages with a .vue extension?`
     );
   }
-
   page.default.layout = page.default.layout || Layout; // This line
   return import.meta.env.SSR ? page : (await page).default;
 }

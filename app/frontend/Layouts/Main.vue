@@ -20,7 +20,7 @@
           Logout
         </v-btn>
       </v-list-item>
-      <AdminGames v-if="user.is_admin" :week="week" :current_group="current_group" :matchups="matchups"
+      <AdminGames v-if="user.is_admin && drawer" :week="week" :current_group="current_group" :matchups="matchups"
         :saved_games="saved_games" />
     </v-navigation-drawer>
     <v-main>
@@ -34,20 +34,14 @@ import AdminGames from './AdminGames.vue'
 import { Link } from '@inertiajs/vue3'
 import { mapState } from 'vuex'
 import { router } from '@inertiajs/vue3'
+import axios from 'axios'
 export default {
   name: "Main Layout",
   components: {
     Link,
     AdminGames
   },
-  created() {
-
-    router.on('start', (event) => {
-      console.log(`Starting a visit to ${event.detail.visit.url}`)
-      this.checkUrl()
-    })
-    
-  },
+  created() {},
   data() {
     return {
       drawer: false
@@ -55,7 +49,7 @@ export default {
   },
   props: ['matchups', 'user', 'saved_games', 'saved_picks', 'current_group', 'week'],
   computed: {
-    ...mapState(['weekly_picks', 'weekly_games', 'admin_override']),
+    ...mapState(['weekly_picks', 'weekly_games', 'admin_override', 'config']),
   },
   methods: {
     signOut() {

@@ -11,13 +11,4 @@ export default defineConfig({
     vuetify({ autoImport: true }),
     FullReload(['config/routes.rb', 'app/views/**/*'], { delay: 200 }),
   ],
-  optimizeDeps: { exclude: ["fsevents"] },
-  build: {
-    sourcemap: false,
-    rollupOptions: {
-      output: {
-        sourcemap: false,
-      },
-    },
-  }
 })

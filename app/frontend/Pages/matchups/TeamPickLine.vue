@@ -59,7 +59,6 @@ export default {
         }
     },
     created () {
-        console.log('running created function in TeamPickLine');
         if (this.picks.length > 0) {
             let pick = this.picks.find(p => p.remote_game_id.toString() === this.remote_game.id.toString())
             if (pick) {

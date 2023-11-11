@@ -1,5 +1,25 @@
 <template>
     <v-container>
+      <v-row class="justify-center align-center">
+        <v-col>
+          <!-- <Link :href="group_url" as="button" class="v-btn v-btn--elevated v-theme--light bg-success v-btn--density-default v-btn--size-default v-btn--variant-elevated">Back To Group Picks</Link> -->
+          <v-btn color="success" @click="backToGroup">Back To Group Picks</v-btn>
+        </v-col>
+        <v-col>
+          <div class="d-flex justify-center">
+            <div class="text-h4">{{ getCalendarDetail }}</div>
+          </div>
+        </v-col>
+        <v-col>
+          <v-select
+            :items="calendars"
+            item-value="value"
+            item-title="label"
+            v-model="selected_calendar"
+            @update:modelValue="navToWeek"
+          ></v-select>
+        </v-col>
+      </v-row>
       <v-row>
         <v-col>
           <v-card-title>
@@ -16,10 +36,6 @@
           </v-card>
         </v-col>
       </v-row>
-      <v-row class="d-flex justify-space-between">
-        <Link :href="navWeeks('back')">previous</Link>
-        <Link :href="navWeeks('forward')">next</Link>
-      </v-row>
     </v-container>
 </template>
   
@@ -29,8 +45,9 @@ import moment from 'moment'
 import { Link } from '@inertiajs/vue3'
 import TeamPickLine from './TeamPickLine.vue'
 import { mapState } from 'vuex'
+import { router } from '@inertiajs/vue3'
 export default {
-  props: ['matchups', 'user', 'week', 'current_group', 'current_week', 'users', 'saved_games', 'saved_picks'],
+  props: ['matchups', 'user', 'week', 'current_group', 'current_week', 'users', 'saved_games', 'saved_picks', 'calendars', 'current_calendar', ],
   components: {
     Link,
     TeamPickLine,
@@ -41,6 +58,7 @@ export default {
       button_text: "Submit",
       // admin_override: false,
       drawer: false,
+      selected_calendar: '',
       // weekly_games: [],
       // weekly_picks: [],
       // config: {
@@ -52,6 +70,7 @@ export default {
     }
   },
   created() {
+    this.selected_calendar = this.week
     if (this.saved_picks && this.saved_picks.length > 0) {
       this.$store.commit('setWeeklyPicks', []) 
       this.saved_picks.forEach(pick => {
@@ -73,6 +92,18 @@ export default {
     }
   },
   computed: {
+    group_url() {
+      return `/${this.current_group.slug}/week_${this.selected_calendar}`
+    },
+    pick_url() {
+      return `/${this.current_group.slug}/week_${this.selected_calendar}/picks`
+    },
+    getCalendarDetail() {
+      if (this.calendars && !!this.selected_calendar) {
+        return this.calendars.find(c => c.value === this.selected_calendar).detail
+      }
+      return ''
+    },
     ...mapState(['admin_override', 'weekly_games', 'weekly_picks', 'config']),
     mappedGames() {
       if (this.saved_games) {
@@ -112,6 +143,12 @@ export default {
     //     this.admin_override = true
     //   }
     // },
+    backToGroup() {
+      router.get(this.group_url)
+    },
+    navToWeek() {
+      router.get(this.pick_url)
+    },
     navWeeks(direction) {
       let diff = direction === 'back' ? -1 : 1
       let week = parseInt(this.handleWeek) + diff
