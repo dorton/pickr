@@ -1,7 +1,8 @@
 <template>
   <v-container>
     <v-row class="justify-center align-center">
-      <v-col></v-col>
+      <v-col>
+      </v-col>
       <v-col>
         <div class="d-flex justify-center">
           <div class="text-h4">{{ getCalendarDetail }}</div>
@@ -12,7 +13,7 @@
           @update:modelValue="navToWeek"></v-select>
       </v-col>
     </v-row>
-    <v-table>
+    <v-table density="compact">
       <thead>
         <tr>
           <th class="text-left">
@@ -23,16 +24,41 @@
           </th>
           <th class="text-center" v-for="remote_game in headers" :key="remote_game.id">
             <div class="text-body-2" v-if="!isComplete(remote_game)">
-              {{ remote_game.shortName }}
+              <div v-if="gameState(remote_game) === 'pre'" class="d-flex flex-column">
+                <div class="score-wrapper">
+                  {{ remote_game.shortName }}
+                </div>
+                <div class="description-wrapper">
+                  <div>{{ getTime(remote_game.date) }}</div>
+                </div>
+              </div>
+              <div v-else class="d-flex flex-column">
+                <div class="score-wrapper">
+                  <div v-for="(homeAway,i) in ['away', 'home']" :key="i" class="d-flex justify-space-around">
+                    <div class="">{{ getTeam(remote_game, homeAway).team.abbreviation }}</div>
+                    <div class="">{{ getScore(remote_game, homeAway) }}</div>
+                  </div>
+                </div>
+                <div class="description-wrapper">
+                  <div>{{ remote_game.status.type.shortDetail }}</div>
+                </div>
+              </div>
             </div>
             <div class="text-body-2" v-if="isComplete(remote_game)">
-              <div class="d-flex justify-space-between">
-                <div class="">{{ getTeam(remote_game, 'away').team.abbreviation }}</div>
-                <div class="">{{ getScore(remote_game, 'away') }}</div>
-              </div>
-              <div class="d-flex justify-space-between">
-                <div class="">{{ getTeam(remote_game, 'home').team.abbreviation }}</div>
-                <div class="">{{ getScore(remote_game, 'home') }}</div>
+              <div class="d-flex flex-column">
+                <div class="score-wrapper">
+                  <div class="d-flex justify-space-between">
+                    <div class="">{{ getTeam(remote_game, 'away').team.abbreviation }}</div>
+                    <div class="">{{ getScore(remote_game, 'away') }}</div>
+                  </div>
+                  <div class="d-flex justify-space-between">
+                    <div class="">{{ getTeam(remote_game, 'home').team.abbreviation }}</div>
+                    <div class="">{{ getScore(remote_game, 'home') }}</div>
+                  </div>
+                </div>
+                <div class="description-wrapper">
+                  <div>{{ remote_game.status.type.shortDetail }}</div>
+                </div>
               </div>
             </div>
           </th>
@@ -41,7 +67,9 @@
           <th class="text-left text-caption">
           </th>
           <th class="text-left text-caption">
-            Points
+            <div v-if="!all_games_pre">
+              Points
+            </div>
           </th>
           <th class="text-left" v-for="header in headers" :key="header.id">
             <div class="table-odds-wrapper d-flex justify-center">
@@ -65,9 +93,14 @@
               {{ u.username }}
             </div>
           </td>
-          <td>
-            <div v-if="!all_games_pre">
+          <td v-if="!all_games_pre">
+            <div>
               {{ getWeeklyPoints(u.id) }}
+            </div>
+          </td>
+          <td v-if="all_games_pre">
+            <div :class="[allGamesPickedClass(u.id), 'text-no-wrap']">
+              {{ allGamesPickedText(u.id) }}
             </div>
           </td>
           <td v-for="remote_game in headers" :key="remote_game.id">
@@ -89,10 +122,31 @@
 <script>
 import { Link } from '@inertiajs/vue3'
 import { router } from '@inertiajs/vue3'
+import moment from 'moment'
+import { mapState } from 'vuex'
 export default {
   name: "Group",
   created() {
     this.selected_calendar = this.week
+    this.$store.commit('setWeeklyPicks', []) 
+    if (this.saved_picks && this.saved_picks.length > 0) {
+      this.saved_picks.forEach(pick => {
+        if (!this.gameInConf(pick)) {
+          this.$store.commit('pushWeeklyPicks', pick)
+        }
+      })
+    }
+    this.$store.commit('setWeeklyGames', [])
+    if (this.saved_games && this.mappedGames.length > 0) {
+      this.mappedGames.forEach(id => {
+        if (id) {
+          let game = this.matchups.events.find(e => e ? e.id === id.toString() : false)
+          if (game && !this.gameInWeek(game)) {
+            this.$store.commit('pushWeeklyGames', game)
+          }
+        }
+      })
+    }
   },
   components: {
     Link,
@@ -104,6 +158,13 @@ export default {
   },
   props: ['matchups', 'current_week', 'user', 'week', 'saved_picks', 'saved_games', 'current_group', 'users', 'user_groups', 'current_calendar', 'calendars'],
   computed: {
+    ...mapState(['weekly_picks', 'weekly_games']),
+    mappedGames() {
+      if (this.saved_games) {
+        return this.saved_games.map(g => g.remote_game_id)
+      }
+      return []
+    },
     all_games_pre() {
       return this.saved_games.map(a => this.gameState(this.getRemoteFromSaved(a))).every(s => s === 'pre')
     },
@@ -121,6 +182,30 @@ export default {
     }
   },
   methods: {
+    gmIndex(game) {
+      return this.weekly_games.findIndex(g => g.id === game.id)
+    },
+    gameInWeek(game) {
+      return this.gmIndex(game) > -1
+    },
+    gameInConf(pick) {
+      return this.getConfIndex(pick) > -1
+    },
+    getConfIndex(pick) {
+      return this.weekly_picks.findIndex(g => g.remote_game_id.toString() === pick.remote_game_id.toString())
+    },
+    getTime(datetime) {
+      return moment(datetime).format('h:mma')
+    },
+    allGamesPickedClass(user_id) {
+      return this.hasTenPicks(user_id) ? 'text-green-darken-3' : 'text-red-darken-3'
+    },
+    allGamesPickedText(user_id) {
+      return this.hasTenPicks(user_id) ? 'Picks In' : 'Picks Not In'
+    },
+    hasTenPicks(user_id) {
+      return this.saved_picks.filter(s => s.user_id === user_id).length === 10
+    },
     getWeeklyPoints(user_id) {
       let all_picks = this.saved_picks.filter(p => p.user_id === user_id)
       let won_picks = all_picks.filter(a => this.correctPick(this.getRemoteFromSaved(a),user_id))
@@ -158,7 +243,6 @@ export default {
       return false
     },
     isComplete(remote_game) {
-      console.log(remote_game.status.type.completed);
       return remote_game.status.type.completed
     },
     getTeam(remote_game, homeAway) {

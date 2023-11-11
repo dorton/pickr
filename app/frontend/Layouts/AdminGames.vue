@@ -1,27 +1,66 @@
 <template>
   <span>
-    <v-list-item>
+    <v-list-item v-if="user.is_admin">
       <v-btn block @click="toggleOverride">
         {{ admin_override ? 'Lock' : 'Unlock' }}
       </v-btn>
     </v-list-item>
-    <v-divider></v-divider>
-    <v-list-item v-if="weekly_games.length > 0" title="Current Games"></v-list-item>
-    <v-list-item v-for="game in weekly_games" :key="game.remote_game_id">
+    <v-divider v-if="user.is_admin"></v-divider>
+    <v-list-item v-if="weekly_games.length > 0 && user.is_admin" title="Current Games"></v-list-item>
+    <v-list-item v-for="game in weekly_games" :key="game.remote_game_id" v-if="user.is_admin">
       <v-card variant="tonal">
         <v-card-title>
-          {{ getTeamName('away', game) }} {{ getTeamRank('away', game) }} @ {{ getTeamName('home', game) }}
-          {{
-            getTeamRank('home', game) }}
+            <div v-if="!isComplete(game)">
+              <div class="text-body-2" v-if="gameState(game) === 'pre'">
+                {{ getTeamName('away', game) }} {{ getTeamRank('away', game) }} @ {{ getTeamName('home', game) }}
+                {{
+                  getTeamRank('home', game) }}
+              </div>
+              <div class="text-body-2" v-else>
+                <div class="d-flex justify-space-between">
+                  <div class="">{{ getTeamName('away', game) }}</div>
+                  <div class="">{{ getScore('away', game) }}</div>
+                </div>
+                <div class="d-flex justify-space-between">
+                  <div class="">{{ getTeamName('home', game) }}</div>
+                  <div class="">{{ getScore('home', game) }}</div>
+                </div>
+              </div>
+            </div>
+            <div class="text-body-2" v-if="isComplete(game)">
+              <div class="d-flex justify-space-between">
+                <div class="">{{ getTeamName('away', game) }}</div>
+                <div class="">{{ getScore('away', game) }}</div>
+              </div>
+              <div class="d-flex justify-space-between">
+                <div class="">{{ getTeamName('home', game) }}</div>
+                <div class="">{{ getScore('home', game) }}</div>
+              </div>
+            </div>
         </v-card-title>
         <v-card-subtitle>
-          {{ handleDate(game) }}
+          <div v-if="!isComplete(game)">
+            <div v-if="gameState(game) === 'pre'">
+              {{ handleDate(game) }}
+            </div>
+            <div v-else>
+              {{ game.status.type.shortDetail }}
+            </div>
+          </div>
+          <div v-if="isComplete(game)">
+            {{ game.status.type.description }}
+          </div>
         </v-card-subtitle>
-        <v-card-text>
+        <v-card-text v-if="!isComplete(game)">
           {{ currentOdds(game) }}
           <EditOdds :game="game" :saved_games="saved_games" :config="config" />
         </v-card-text>
-        <v-card-actions>
+        <v-card-text v-else>
+          <div>
+            Saved Odds {{ getSavedOdds(game) }}
+          </div>
+        </v-card-text>
+        <v-card-actions v-if="!isComplete(game) && user.is_admin">
           <v-btn color="indigo-darken-3" @click="manageWeeklyGames(game)">
             {{ getAddGameText(game) }}
           </v-btn>
@@ -34,17 +73,51 @@
     <v-list-item v-for="matchup in events" :key="matchup.id">
       <v-card variant="tonal">
         <v-card-title>
-          {{ getTeamName('away', matchup) }} {{ getTeamRank('away', matchup) }} @ {{ getTeamName('home', matchup) }}
-          {{
-            getTeamRank('home', matchup) }}
+          <div v-if="!isComplete(matchup)">
+            <div class="text-body-2" v-if="gameState(matchup) === 'pre'">
+              {{ getTeamName('away', matchup) }} {{ getTeamRank('away', matchup) }} @ {{ getTeamName('home', matchup) }}
+              {{
+                getTeamRank('home', matchup) }}
+            </div>
+            <div class="text-body-2" v-else>
+              <div class="d-flex justify-space-between">
+                <div class="">{{ getTeamName('away', matchup) }}</div>
+                <div class="">{{ getScore('away', matchup) }}</div>
+              </div>
+              <div class="d-flex justify-space-between">
+                <div class="">{{ getTeamName('home', matchup) }}</div>
+                <div class="">{{ getScore('home', matchup) }}</div>
+              </div>
+            </div>
+          </div>
+          <div class="text-body-2" v-if="isComplete(matchup)">
+            <div class="d-flex justify-space-between">
+              <div class="">{{ getTeamName('away', matchup) }}</div>
+              <div class="">{{ getScore('away', matchup) }}</div>
+            </div>
+            <div class="d-flex justify-space-between">
+              <div class="">{{ getTeamName('home', matchup) }}</div>
+              <div class="">{{ getScore('home', matchup) }}</div>
+            </div>
+          </div>
         </v-card-title>
         <v-card-subtitle>
-          {{ handleDate(matchup) }}
+          <div v-if="!isComplete(matchup)">
+            <div v-if="gameState(matchup) === 'pre'">
+              {{ handleDate(matchup) }}
+            </div>
+            <div v-else>
+              {{ matchup.status.type.shortDetail }}
+            </div>
+          </div>
+          <div v-if="isComplete(matchup)">
+            {{ matchup.status.type.description }}
+          </div>
         </v-card-subtitle>
-        <v-card-text>
+        <v-card-text v-if="!isComplete(matchup)">
           {{ currentOdds(matchup) }}
         </v-card-text>
-        <v-card-actions>
+        <v-card-actions v-if="!isComplete(matchup) && user.is_admin">
           <v-btn color="indigo-darken-3" @click="manageWeeklyGames(matchup)">
             {{ getAddGameText(matchup) }}
           </v-btn>
@@ -68,7 +141,7 @@ export default {
   data() {
     return {};
   },
-  props: ['week', 'matchups', 'saved_games', 'current_group', 'saved_games'],
+  props: ['week', 'matchups', 'saved_games', 'current_group', 'saved_games', 'user'],
   computed: {
     ...mapState(['admin_override', 'weekly_games', 'config']),
     events() {
@@ -82,6 +155,18 @@ export default {
     },
   },
   methods: {
+    getSavedOdds(remote_game) {
+      return this.getSavedGameFromRemoteGame(remote_game).odds
+    },
+    getSavedGameFromRemoteGame(remote_game) {
+      return this.saved_games.find(s => s.remote_game_id.toString() === remote_game.id)
+    },
+    gameState(matchup) {
+      return matchup.status.type.state
+    },
+    isComplete(matchup) {
+      return matchup.status.type.completed
+    },
     toggleOverride() {
       this.$store.commit('setAdminOverride', !this.admin_override)
     },
@@ -90,6 +175,9 @@ export default {
     },
     getTeamName(homeAway, matchup) {
       return this.getTeam(homeAway, matchup).team.abbreviation
+    },
+    getScore(homeAway, matchup) {
+      return this.getTeam(homeAway, matchup).score
     },
     getTeamRank(homeAway, matchup) {
       return this.getTeam(homeAway, matchup).curatedRank.current <= 25 ? `(${this.getTeam(homeAway, matchup).curatedRank.current})` : ''
@@ -102,10 +190,10 @@ export default {
       if (comps && comps.length > 0) {
         let odds = comps[0].odds
         if (odds && odds.length > 0) {
-          return odds[0].details || 'No Current Odds'
+          return odds[0].details || ''
         }
       }
-      return 'No Current Odds'
+      return ''
     },
     gmIndex(game) {
       return this.weekly_games.findIndex(g => g.id === game.id)

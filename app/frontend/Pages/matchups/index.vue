@@ -71,16 +71,16 @@ export default {
   },
   created() {
     this.selected_calendar = this.week
+    this.$store.commit('setWeeklyPicks', []) 
     if (this.saved_picks && this.saved_picks.length > 0) {
-      this.$store.commit('setWeeklyPicks', []) 
       this.saved_picks.forEach(pick => {
         if (!this.gameInConf(pick)) {
           this.$store.commit('pushWeeklyPicks', pick)
         }
       })
     }
+    this.$store.commit('setWeeklyGames', [])
     if (this.saved_games && this.mappedGames.length > 0) {
-      this.$store.commit('setWeeklyGames', [])
       this.mappedGames.forEach(id => {
         if (id) {
           let game = this.matchups.events.find(e => e ? e.id === id.toString() : false)
