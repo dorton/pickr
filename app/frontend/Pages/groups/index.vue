@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container fluid>
     <v-row class="justify-center align-center">
       <v-col>
         <div class="d-flex justify-center">
@@ -27,7 +27,7 @@
                   {{ remote_game.shortName }}
                 </div>
                 <div class="description-wrapper">
-                  <div> {{ remote_game.competitions[0].broadcasts[0].names[0] }}</div>
+                  <div> {{ getBroadcast(remote_game) }}</div>
                   <div>{{ getTime(remote_game.date) }}</div>
                 </div>
               </div>
@@ -89,11 +89,11 @@
       <tbody class="pb-4">
         <tr v-for="u in sorted_users" :key="u.id">
           <td>
-            <div class="text-no-wrap" v-if="u.email === user.email">
+            <div class="text-no-wrap d-flex justify-left align-center" v-if="u.email === user.email">
               <Link :href="current_pick_url">{{ u.username }}</Link>
             </div>
             <div v-else>
-              <div class="d-flex justify-center align-center">
+              <div class="d-flex justify-left align-center">
                 <div class="text-caption mr-2" v-if="user.is_admin && admin_override">
                   <Link :href="admin_edit_url(u.id)">edit</Link>
                 </div>
@@ -113,7 +113,7 @@
               </div>
             </div>
           </td>
-          <td v-if="all_games_pre" class="text-center">
+          <td v-if="all_games_pre" class="text-left">
             <div :class="[allGamesPickedClass(u.id), 'text-no-wrap']">
               {{ allGamesPickedText(u.id) }}
             </div>
@@ -202,6 +202,19 @@ export default {
     }
   },
   methods: {
+    getBroadcast(remote_game) {
+      let comps = remote_game.competitions
+      if (comps && comps.length > 0) {
+          let broadcasts = comps[0].broadcasts
+          if (broadcasts && broadcasts.length > 0) {
+            let names = broadcasts[0].names
+            if (names && names.length > 0) {
+              return names[0]
+            }
+          }
+      }
+      return ''
+    },
     admin_edit_url(id) {
       return `/${this.current_group.slug}/week_${this.week}/picks/${id}`
     },

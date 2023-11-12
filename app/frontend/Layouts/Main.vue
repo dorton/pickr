@@ -25,13 +25,8 @@
     </v-app-bar>
     <v-navigation-drawer location="right" v-model="drawer" temporary>
       <v-list-item>
-        <div class="d-flex align-content-center justify-center">
-          <div>{{ user.username }}</div>
-        </div>
-      </v-list-item>
-      <v-list-item>
         <v-btn block href="/manage/groups">
-          Manage Groups
+          {{ user.username }}
         </v-btn>
       </v-list-item>
       <v-list-item>
