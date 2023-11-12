@@ -2,8 +2,6 @@
   <v-container>
     <v-row class="justify-center align-center">
       <v-col>
-      </v-col>
-      <v-col>
         <div class="d-flex justify-center">
           <div class="text-h4">{{ getCalendarDetail }}</div>
         </div>
@@ -13,7 +11,7 @@
           @update:modelValue="navToWeek"></v-select>
       </v-col>
     </v-row>
-    <v-table>
+    <v-table density="compact">
       <thead>
         <tr>
           <th class="text-left">
@@ -22,7 +20,7 @@
           <th class="text-left">
 
           </th>
-          <th :class="['text-center', handleBgColor(remote_game)]" v-for="remote_game in headers" :key="remote_game.id">
+          <th :class="['text-center', handleBgColor(remote_game)]" v-for="remote_game in sorted_headers" :key="remote_game.id">
             <div class="text-body-2" v-if="!isComplete(remote_game)">
               <div v-if="gameState(remote_game) === 'pre'" class="d-flex flex-column">
                 <div class="score-wrapper">
@@ -68,12 +66,15 @@
         <tr>
           <th class="text-left text-caption">
           </th>
-          <th class="text-center text-caption">
-            <div v-if="!all_games_pre">
-              Points
+          <th class="text-center text-caption text-no-wrap">
+            <div class="d-flex" v-if="!all_games_pre">
+              <div>Pts</div>
+              <div v-if="!all_games_complete">
+                <span class="mx-1">|</span> <span>Max</span>
+              </div>
             </div>
           </th>
-          <th :class="['text-center', handleBgColor(header)]" v-for="header in headers" :key="header.id">
+          <th :class="['text-center', handleBgColor(header)]" v-for="header in sorted_headers" :key="header.id">
             <div class="table-odds-wrapper d-flex justify-center">
               <div class="text-caption fav mr-1">
                 {{ getFavoredTeam(header) ? getFavoredTeam(header).team.abbreviation : 'No Team' }}
@@ -86,7 +87,7 @@
         </tr>
       </thead>
       <tbody class="pb-4">
-        <tr v-for="u in users" :key="u.id">
+        <tr v-for="u in sorted_users" :key="u.id">
           <td>
             <div class="text-no-wrap" v-if="u.email === user.email">
               <Link :href="current_pick_url">{{ u.username }}</Link>
@@ -102,9 +103,14 @@
               </div>
             </div>
           </td>
-          <td v-if="!all_games_pre" class="text-center">
-            <div>
-              {{ getWeeklyPoints(u.id) }}
+          <td v-if="!all_games_pre" class="text-center text-no-wrap">
+            <div class="d-flex">
+              <div>
+                {{ getWeeklyPoints(u.id) }}
+              </div>
+              <div v-if="getWeeklyMaxPoints(u.id) > 0">
+                <span class="mx-1">|</span><span>{{ getWeeklyMaxPoints(u.id) }}</span>
+              </div>
             </div>
           </td>
           <td v-if="all_games_pre" class="text-center">
@@ -112,7 +118,7 @@
               {{ allGamesPickedText(u.id) }}
             </div>
           </td>
-          <td v-for="remote_game in headers" :key="remote_game.id">
+          <td v-for="remote_game in sorted_headers" :key="remote_game.id">
             <div :class="['d-flex flex-column align-center mt-1', handleScoreClass(remote_game, u.id)]" v-if="!all_games_pre">
               <div class="team-pick">
                 {{ getTeamPickFromRemote(remote_game, u.id) ? getTeamPickFromRemote(remote_game, u.id).team.abbreviation : 'No Pick' }}
@@ -169,7 +175,10 @@ export default {
   props: ['matchups', 'current_week', 'user', 'week', 'saved_picks', 'saved_games', 'current_group', 'users', 'user_groups', 'current_calendar', 'calendars'],
   computed: {
     ...mapState(['weekly_picks', 'weekly_games', 'admin_override']),
-    ...mapGetters(['all_games_pre']),
+    ...mapGetters(['all_games_pre', 'all_games_complete']),
+    sorted_users() {
+      return this.users.sort((a,b) => this.getWeeklyPoints(b.id) - this.getWeeklyPoints(a.id))
+    },
     mappedGames() {
       if (this.saved_games) {
         return this.saved_games.map(g => g.remote_game_id)
@@ -187,6 +196,9 @@ export default {
     },
     headers() {
       return this.saved_games.map(g => this.matchups.events.find(e => e.id === g.remote_game_id.toString()))
+    },
+    sorted_headers () {
+      return this.headers.sort((a,b) => this.matchups.events.findIndex(e=>e.id === a.id) - this.matchups.events.findIndex(e=>e.id === b.id))
     }
   },
   methods: {
@@ -237,6 +249,17 @@ export default {
       } else {
         return 0
       }
+    },
+    getWeeklyMaxPoints(user_id) {
+      let in_progress = this.saved_picks.filter(p => p.user_id === user_id && this.gamesNotComplete(p)).map(p => p.confidence)
+      if (in_progress.length > 0) {
+        return in_progress.reduce((a,b) => a + b) + this.getWeeklyPoints(user_id)
+      } else {
+        return 0
+      }
+    },
+    gamesNotComplete(saved_game) {
+      return !this.getRemoteFromSaved(saved_game).status.type.completed
     },
     handleScoreClass(remote_game, user_id) {
       if (this.gameState(remote_game) !== 'post') {

@@ -124,7 +124,7 @@
         <v-card-text v-if="!isComplete(matchup)">
           {{ currentOdds(matchup) }}
         </v-card-text>
-        <v-card-actions v-if="!isComplete(matchup) && user.is_admin">
+        <v-card-actions v-if="showButton(matchup, user)">
           <v-btn color="indigo-darken-3" @click="manageWeeklyGames(matchup)">
             {{ getAddGameText(matchup) }}
           </v-btn>
@@ -151,7 +151,7 @@ export default {
   props: ['week', 'matchups', 'saved_games', 'current_group', 'saved_games', 'user'],
   computed: {
     ...mapState(['admin_override', 'weekly_games', 'config']),
-    ...mapGetters(['all_games_pre']),
+    ...mapGetters(['all_games_pre', 'all_games_complete']),
     events() {
       return this.matchups.events
     },
@@ -163,6 +163,9 @@ export default {
     },
   },
   methods: {
+    showButton(_matchup, user) {
+      return user.is_admin && this.all_games_pre
+    },
     getSavedOdds(remote_game) {
       return this.getSavedGameFromRemoteGame(remote_game).odds
     },

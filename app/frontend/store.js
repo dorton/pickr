@@ -50,6 +50,9 @@ export const store = createStore({
       },
     },
     getters: {
+      all_games_complete (state) {
+        return state.weekly_games.map(a => a.status.type.completed).every(s => s)
+      },
       all_games_pre (state) {
         return state.weekly_games.map(a => a.status.type.state).every(s => s === 'pre')
       },
