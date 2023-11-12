@@ -47,6 +47,7 @@
 </template>
 <script>
 import moment from 'moment'
+import { mapGetters } from 'vuex'
 export default {
     props: ['remote_game', 'picks', 'week', 'saved_game', 'admin_override', 'user'],
     data() {
@@ -83,6 +84,7 @@ export default {
         }
     },
     computed: {
+        ...mapGetters(['all_games_pre']),
         handleDropColor() {
             if (this.gameState !== 'post') {
                 return ''
@@ -128,7 +130,7 @@ export default {
             if (this.admin_override) {
                 return false
             }
-            return this.team_id === null || (this.gameState && this.gameState !== 'pre')
+            return this.team_id === null || !this.all_games_pre
         },
         saved_odds() {
             if (this.saved_game && this.saved_game.odds) {
@@ -182,7 +184,7 @@ export default {
             if (this.admin_override) {
                 return false
             }
-            return this.gameState !== 'pre'
+            return !this.all_games_pre
         }
     },
     methods: {

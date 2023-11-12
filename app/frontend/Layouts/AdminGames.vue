@@ -11,7 +11,7 @@
       <v-card variant="tonal">
         <v-card-title>
             <div v-if="!isComplete(game)">
-              <div class="text-body-2" v-if="gameState(game) === 'pre'">
+              <div class="text-body-2" v-if="all_games_pre">
                 {{ getTeamName('away', game) }} {{ getTeamRank('away', game) }} @ {{ getTeamName('home', game) }}
                 {{
                   getTeamRank('home', game) }}
@@ -40,18 +40,25 @@
         </v-card-title>
         <v-card-subtitle>
           <div v-if="!isComplete(game)">
-            <div v-if="gameState(game) === 'pre'">
+            <div v-if="all_games_pre">
               {{ handleDate(game) }}
             </div>
             <div v-else>
-              {{ game.status.type.shortDetail }}
+              <div>
+                <div>
+                  {{ game.status.type.shortDetail }}
+                </div>
+                <div>
+                  {{ game.competitions[0].broadcasts[0].names[0] }}
+                </div>
+              </div>
             </div>
           </div>
           <div v-if="isComplete(game)">
             {{ game.status.type.description }}
           </div>
         </v-card-subtitle>
-        <v-card-text v-if="!isComplete(game)">
+        <v-card-text v-if="!isComplete(game) && all_games_pre">
           {{ currentOdds(game) }}
           <EditOdds :game="game" :saved_games="saved_games" :config="config" />
         </v-card-text>
@@ -60,7 +67,7 @@
             Saved Odds {{ getSavedOdds(game) }}
           </div>
         </v-card-text>
-        <v-card-actions v-if="!isComplete(game) && user.is_admin">
+        <v-card-actions v-if="!isComplete(game) && user.is_admin && all_games_pre">
           <v-btn color="indigo-darken-3" @click="manageWeeklyGames(game)">
             {{ getAddGameText(game) }}
           </v-btn>
@@ -129,7 +136,7 @@
 
 <script>
 import EditOdds from './EditOdds.vue'
-import { mapState } from 'vuex'
+import { mapState, mapGetters } from 'vuex'
 import moment from 'moment'
 import axios from 'axios'
 export default {
@@ -144,6 +151,7 @@ export default {
   props: ['week', 'matchups', 'saved_games', 'current_group', 'saved_games', 'user'],
   computed: {
     ...mapState(['admin_override', 'weekly_games', 'config']),
+    ...mapGetters(['all_games_pre']),
     events() {
       return this.matchups.events
     },

@@ -5,6 +5,20 @@
         <Link href="/">Pickr</Link>
       </v-app-bar-title>
       <v-spacer></v-spacer>
+      <v-menu v-if="user_groups.length > 1">
+        <template v-slot:activator="{ props }">
+          <v-btn icon="mdi-dots-vertical" v-bind="props"></v-btn>
+        </template>
+
+        <v-list>
+          <v-list-item
+            v-for="(group, i) in user_groups"
+            :key="i"
+          >
+            <v-list-item-title @click="changeGroups(group)">{{ group.name }}</v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-menu>
       <v-btn icon>
         <v-icon @click="drawer = !drawer">mdi-cog</v-icon>
       </v-btn>
@@ -14,6 +28,11 @@
         <div class="d-flex align-content-center justify-center">
           <div>{{ user.username }}</div>
         </div>
+      </v-list-item>
+      <v-list-item>
+        <v-btn block href="/manage/groups">
+          Manage Groups
+        </v-btn>
       </v-list-item>
       <v-list-item>
         <v-btn block @click="signOut">
@@ -41,17 +60,22 @@ export default {
     Link,
     AdminGames
   },
-  created() {},
+  created() {
+    this.$store.commit('setMatchups', this.matchups)
+  },
   data() {
     return {
       drawer: false
     };
   },
-  props: ['matchups', 'user', 'saved_games', 'saved_picks', 'current_group', 'week'],
+  props: ['matchups', 'user', 'saved_games', 'saved_picks', 'current_group', 'week', 'user_groups'],
   computed: {
     ...mapState(['weekly_picks', 'weekly_games', 'admin_override', 'config']),
   },
   methods: {
+    changeGroups(group) {
+      router.get(`/${group.slug}`)
+    },
     signOut() {
       axios.delete('/users/sign_out', this.config).then(() => {
         window.location.reload();

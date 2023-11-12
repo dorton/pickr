@@ -2,8 +2,7 @@
     <v-container>
       <v-row class="justify-center align-center">
         <v-col>
-          <!-- <Link :href="group_url" as="button" class="v-btn v-btn--elevated v-theme--light bg-success v-btn--density-default v-btn--size-default v-btn--variant-elevated">Back To Group Picks</Link> -->
-          <v-btn color="success" @click="backToGroup">Back To Group Picks</v-btn>
+          <v-btn color="success" @click="backToGroup">Back To Group</v-btn>
         </v-col>
         <v-col>
           <div class="d-flex justify-center">
@@ -24,7 +23,7 @@
         <v-col>
           <v-card-title>
             <div class="title-wrapper">
-              <div class="title">My Picks</div>
+              <div class="title">{{ user.username }} Picks</div>
               <div class="submit" v-if="canSubmit"><v-btn :loading="loading" color="success" @click="handleSubmit()">{{button_text}}</v-btn></div>
             </div>
           </v-card-title>
@@ -71,6 +70,7 @@ export default {
   },
   created() {
     this.selected_calendar = this.week
+    this.$store.commit('setMatchups', this.matchups)
     this.$store.commit('setWeeklyPicks', []) 
     if (this.saved_picks && this.saved_picks.length > 0) {
       this.saved_picks.forEach(pick => {

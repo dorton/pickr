@@ -3,6 +3,7 @@ import { createStore } from 'vuex'
 export const store = createStore({
     state () {
       return {
+        matchups: null,
         saved_games: null,
         saved_picks: null,
         admin_override: false,
@@ -17,6 +18,9 @@ export const store = createStore({
       }
     },
     mutations: {
+      setMatchups (state, payload) {
+        state.matchups = payload
+      },
       setSavedGames (state, payload) {
         state.saved_games = payload
       },  
@@ -44,5 +48,15 @@ export const store = createStore({
       spliceWeeklyGames (state, index) {
         state.weekly_games.splice(index, 1)
       },
-    }
+    },
+    getters: {
+      all_games_pre (state) {
+        return state.weekly_games.map(a => a.status.type.state).every(s => s === 'pre')
+      },
+      getRemoteFromSaved: (state) => (saved_game) => {
+        return state.matchups.events.find(s => s.id === saved_game.remote_game_id.toString())
+      },
+
+    },
+    actions: {}
   })

@@ -13,7 +13,7 @@
           @update:modelValue="navToWeek"></v-select>
       </v-col>
     </v-row>
-    <v-table density="compact">
+    <v-table>
       <thead>
         <tr>
           <th class="text-left">
@@ -22,41 +22,43 @@
           <th class="text-left">
 
           </th>
-          <th class="text-center" v-for="remote_game in headers" :key="remote_game.id">
+          <th :class="['text-center', handleBgColor(remote_game)]" v-for="remote_game in headers" :key="remote_game.id">
             <div class="text-body-2" v-if="!isComplete(remote_game)">
               <div v-if="gameState(remote_game) === 'pre'" class="d-flex flex-column">
                 <div class="score-wrapper">
                   {{ remote_game.shortName }}
                 </div>
                 <div class="description-wrapper">
+                  <div> {{ remote_game.competitions[0].broadcasts[0].names[0] }}</div>
                   <div>{{ getTime(remote_game.date) }}</div>
                 </div>
               </div>
-              <div v-else class="d-flex flex-column">
+              <div v-else :class="['d-flex', 'flex-column', 'ma-2', 'font-weight-bold']">
                 <div class="score-wrapper">
-                  <div v-for="(homeAway,i) in ['away', 'home']" :key="i" class="d-flex justify-space-around">
-                    <div class="">{{ getTeam(remote_game, homeAway).team.abbreviation }}</div>
-                    <div class="">{{ getScore(remote_game, homeAway) }}</div>
+                  <div v-for="(homeAway,i) in ['away', 'home']" :key="i" class="d-flex justify-space-between">
+                    <div class="">{{ getTeam(remote_game, homeAway) ? getTeam(remote_game, homeAway).team.abbreviation : 'No Game' }}</div>
+                    <div class="ml-2">{{ getScore(remote_game, homeAway) }}</div>
                   </div>
                 </div>
-                <div class="description-wrapper">
+                <div class="description-wrapper text-no-wrap">
+                  <div> {{ remote_game.competitions[0].broadcasts[0].names[0] }}</div>
                   <div>{{ remote_game.status.type.shortDetail }}</div>
                 </div>
               </div>
             </div>
-            <div class="text-body-2" v-if="isComplete(remote_game)">
+            <div class="text-body-2 ma-2" v-if="isComplete(remote_game)">
               <div class="d-flex flex-column">
                 <div class="score-wrapper">
                   <div class="d-flex justify-space-between">
-                    <div class="">{{ getTeam(remote_game, 'away').team.abbreviation }}</div>
-                    <div class="">{{ getScore(remote_game, 'away') }}</div>
+                    <div class="">{{ getTeam(remote_game, 'away') ? getTeam(remote_game, 'away').team.abbreviation : 'No Game' }}</div>
+                    <div class="ml-2">{{ getScore(remote_game, 'away') }}</div>
                   </div>
                   <div class="d-flex justify-space-between">
-                    <div class="">{{ getTeam(remote_game, 'home').team.abbreviation }}</div>
-                    <div class="">{{ getScore(remote_game, 'home') }}</div>
+                    <div class="">{{ getTeam(remote_game, 'home') ? getTeam(remote_game, 'home').team.abbreviation : 'No Game' }}</div>
+                    <div class="ml-2">{{ getScore(remote_game, 'home') }}</div>
                   </div>
                 </div>
-                <div class="description-wrapper">
+                <div class="description-wrapper text-no-wrap">
                   <div>{{ remote_game.status.type.shortDetail }}</div>
                 </div>
               </div>
@@ -66,15 +68,15 @@
         <tr>
           <th class="text-left text-caption">
           </th>
-          <th class="text-left text-caption">
+          <th class="text-center text-caption">
             <div v-if="!all_games_pre">
               Points
             </div>
           </th>
-          <th class="text-left" v-for="header in headers" :key="header.id">
+          <th :class="['text-center', handleBgColor(header)]" v-for="header in headers" :key="header.id">
             <div class="table-odds-wrapper d-flex justify-center">
               <div class="text-caption fav mr-1">
-                {{ getFavoredTeam(header).team.abbreviation }}
+                {{ getFavoredTeam(header) ? getFavoredTeam(header).team.abbreviation : 'No Team' }}
               </div>
               <div class="text-caption odds">
                 {{ getSavedOdds(header) }}
@@ -83,33 +85,40 @@
           </th>
         </tr>
       </thead>
-      <tbody>
+      <tbody class="pb-4">
         <tr v-for="u in users" :key="u.id">
           <td>
-            <div v-if="u.email === user.email">
+            <div class="text-no-wrap" v-if="u.email === user.email">
               <Link :href="current_pick_url">{{ u.username }}</Link>
             </div>
             <div v-else>
-              {{ u.username }}
+              <div class="d-flex justify-center align-center">
+                <div class="text-caption mr-2" v-if="user.is_admin && admin_override">
+                  <Link :href="admin_edit_url(u.id)">edit</Link>
+                </div>
+                <div class="text-no-wrap">
+                  {{ u.username }}
+                </div>
+              </div>
             </div>
           </td>
-          <td v-if="!all_games_pre">
+          <td v-if="!all_games_pre" class="text-center">
             <div>
               {{ getWeeklyPoints(u.id) }}
             </div>
           </td>
-          <td v-if="all_games_pre">
+          <td v-if="all_games_pre" class="text-center">
             <div :class="[allGamesPickedClass(u.id), 'text-no-wrap']">
               {{ allGamesPickedText(u.id) }}
             </div>
           </td>
           <td v-for="remote_game in headers" :key="remote_game.id">
-            <div :class="['d-flex flex-column align-center', handleScoreClass(remote_game, u.id)]" v-if="!all_games_pre">
-              <div class="team-pick text-body-2">
-                {{ getTeamPickFromRemote(remote_game, u.id).team.abbreviation }}
+            <div :class="['d-flex flex-column align-center mt-1', handleScoreClass(remote_game, u.id)]" v-if="!all_games_pre">
+              <div class="team-pick">
+                {{ getTeamPickFromRemote(remote_game, u.id) ? getTeamPickFromRemote(remote_game, u.id).team.abbreviation : 'No Pick' }}
               </div>
-              <div class="confidence text-body-2">
-                {{ getConfidenceFromRemote(remote_game, u.id) }}
+              <div class="confidence">
+                {{ getConfidenceFromRemote(remote_game, u.id) | '' }}
               </div>
             </div>
           </td>
@@ -123,11 +132,12 @@
 import { Link } from '@inertiajs/vue3'
 import { router } from '@inertiajs/vue3'
 import moment from 'moment'
-import { mapState } from 'vuex'
+import { mapState, mapGetters } from 'vuex'
 export default {
   name: "Group",
   created() {
     this.selected_calendar = this.week
+    this.$store.commit('setMatchups', this.matchups)
     this.$store.commit('setWeeklyPicks', []) 
     if (this.saved_picks && this.saved_picks.length > 0) {
       this.saved_picks.forEach(pick => {
@@ -158,15 +168,13 @@ export default {
   },
   props: ['matchups', 'current_week', 'user', 'week', 'saved_picks', 'saved_games', 'current_group', 'users', 'user_groups', 'current_calendar', 'calendars'],
   computed: {
-    ...mapState(['weekly_picks', 'weekly_games']),
+    ...mapState(['weekly_picks', 'weekly_games', 'admin_override']),
+    ...mapGetters(['all_games_pre']),
     mappedGames() {
       if (this.saved_games) {
         return this.saved_games.map(g => g.remote_game_id)
       }
       return []
-    },
-    all_games_pre() {
-      return this.saved_games.map(a => this.gameState(this.getRemoteFromSaved(a))).every(s => s === 'pre')
     },
     getCalendarDetail() {
       if (this.calendars && !!this.selected_calendar) {
@@ -182,6 +190,18 @@ export default {
     }
   },
   methods: {
+    admin_edit_url(id) {
+      return `/${this.current_group.slug}/week_${this.week}/picks/${id}`
+    },
+    handleBgColor(remote_game) {
+      if (this.gameState(remote_game) === 'in') {
+        return 'bg-blue-lighten-5'
+      }
+      if (this.gameState(remote_game) === 'post') {
+        return 'bg-grey-darken-1'
+      }
+      return 'bg-grey-lighten-3'
+    },
     gmIndex(game) {
       return this.weekly_games.findIndex(g => g.id === game.id)
     },
@@ -208,14 +228,21 @@ export default {
     },
     getWeeklyPoints(user_id) {
       let all_picks = this.saved_picks.filter(p => p.user_id === user_id)
-      let won_picks = all_picks.filter(a => this.correctPick(this.getRemoteFromSaved(a),user_id))
-      return won_picks.map(w => w.confidence).reduce((a,b) => a + b)
+      let won_picks = all_picks.map(a => {
+        let cp = this.correctPick(this.getRemoteFromSaved(a),user_id)
+        return cp ? a.confidence : 0
+      })
+      if (won_picks.length > 0) {
+        return won_picks.reduce((a,b) => a + b)
+      } else {
+        return 0
+      }
     },
     handleScoreClass(remote_game, user_id) {
       if (this.gameState(remote_game) !== 'post') {
         return ''
       }
-      return this.correctPick(remote_game, user_id) ? 'text-green-darken-3 font-weight-bold' : 'text-red-darken-3 text-decoration-line-through'
+      return this.correctPick(remote_game, user_id) ? 'text-body-2 text-green-darken-3 font-weight-bold' : 'text-body-2 text-red-darken-3 text-decoration-line-through'
     },
     gameState(remote_game) {
       return remote_game.status.type.state
@@ -233,6 +260,9 @@ export default {
       return this.pickedTeamHomeAway(picked_team) && this.pickedTeamHomeAway(picked_team) === 'home' ? 'away' : 'home';
     },
     correctPick(remote_game, user_id) {
+      if (!this.isComplete(remote_game)) {
+        return false
+      }
       let favored_team = this.getFavoredTeam(remote_game)
       let picked_team = this.getTeamPickFromRemote(remote_game, user_id)
       let saved_odds = this.getSavedOdds(remote_game)
