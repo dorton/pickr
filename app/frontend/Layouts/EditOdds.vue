@@ -16,6 +16,7 @@
 </template>
 <script>
 import axios from 'axios'
+import { mapState } from 'vuex'
 export default {
     props: ['game', 'saved_games', 'config'],
     data() {
@@ -31,7 +32,11 @@ export default {
         }
     },
     computed: {
+        ...mapState(['admin_override']),
         canSubmit() {
+            if (this.admin_override) {
+                return true
+            }
             return this.odds !== null && this.favored_team_id !== null
         },
         saved_game() {

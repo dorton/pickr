@@ -67,7 +67,7 @@
             Saved Odds {{ getSavedOdds(game) }}
           </div>
         </v-card-text>
-        <v-card-actions v-if="!isComplete(game) && user.is_admin && all_games_pre">
+        <v-card-actions v-if="showButton(game, user)">
           <v-btn color="indigo-darken-3" @click="manageWeeklyGames(game)">
             {{ getAddGameText(game) }}
           </v-btn>
