@@ -170,7 +170,6 @@ export default {
     handleSubmit() {
       this.loading = true
       axios.post('/picks', { pick: this.weekly_picks, group: this.current_group }, this.config).then(r => {
-        console.log('r:', r);
         if (r.status === 200) {
           this.button_text = "Updated"
           this.loading = false
