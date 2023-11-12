@@ -151,7 +151,7 @@ export default {
   props: ['week', 'matchups', 'saved_games', 'current_group', 'saved_games', 'user'],
   computed: {
     ...mapState(['admin_override', 'weekly_games', 'config']),
-    ...mapGetters(['all_games_pre', 'all_games_complete']),
+    ...mapGetters(['all_games_pre', 'all_games_complete', 'week_in_past']),
     events() {
       return this.matchups.events
     },
@@ -167,7 +167,7 @@ export default {
       if (this.admin_override) {
         return true
       }
-      return user.is_admin && this.all_games_pre
+      return user.is_admin && this.all_games_pre && !this.week_in_past
     },
     getSavedOdds(remote_game) {
       return this.getSavedGameFromRemoteGame(remote_game).odds

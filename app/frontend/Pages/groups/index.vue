@@ -3,6 +3,11 @@
     <v-row class="justify-center align-center">
       <v-col>
         <div class="d-flex justify-center">
+          <div class="text-h4">{{ current_group.name }}</div>
+        </div>
+      </v-col>
+      <v-col>
+        <div class="d-flex justify-center">
           <div class="text-h4">{{ getCalendarDetail }}</div>
         </div>
       </v-col>

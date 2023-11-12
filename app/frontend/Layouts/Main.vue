@@ -34,8 +34,7 @@
           Logout
         </v-btn>
       </v-list-item>
-      <AdminGames v-if="drawer" :user="user" :week="week" :current_group="current_group" :matchups="matchups"
-        :saved_games="saved_games" />
+      <AdminGames v-if="drawer" :user="user" :week="week" :current_group="current_group" :current_calendar="current_calendar" :matchups="matchups" :saved_games="saved_games" />
     </v-navigation-drawer>
     <v-main>
       <slot></slot>
@@ -57,13 +56,14 @@ export default {
   },
   created() {
     this.$store.commit('setMatchups', this.matchups)
+    this.$store.commit('setWeekCalendar', this.week_calendar)
   },
   data() {
     return {
       drawer: false
     };
   },
-  props: ['matchups', 'user', 'saved_games', 'saved_picks', 'current_group', 'week', 'user_groups'],
+  props: ['matchups', 'user', 'saved_games', 'saved_picks', 'current_group', 'week', 'user_groups', 'current_calendar', 'week_calendar'],
   computed: {
     ...mapState(['weekly_picks', 'weekly_games', 'admin_override', 'config']),
   },

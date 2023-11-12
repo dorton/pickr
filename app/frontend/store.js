@@ -1,8 +1,9 @@
 import { createStore } from 'vuex'
-
+import moment from 'moment'
 export const store = createStore({
     state () {
       return {
+        week_calendar: [],
         matchups: null,
         saved_games: null,
         saved_picks: null,
@@ -18,6 +19,9 @@ export const store = createStore({
       }
     },
     mutations: {
+      setWeekCalendar (state, payload) {
+        state.week_calendar = payload
+      },
       setMatchups (state, payload) {
         state.matchups = payload
       },
@@ -59,6 +63,9 @@ export const store = createStore({
       getRemoteFromSaved: (state) => (saved_game) => {
         return state.matchups.events.find(s => s.id === saved_game.remote_game_id.toString())
       },
+      week_in_past(state) {
+        return moment(state.week_calendar.endDate).isBefore(moment())
+      }
 
     },
     actions: {}

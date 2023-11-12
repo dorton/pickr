@@ -2,8 +2,9 @@ class HomeController < ApplicationController
   
     def index
         @group = params[:group_slug] ? Group.find_by_slug(params[:group_slug]) : current_user.groups.first
-        @week = params[:week_id] ? params[:week_id].split('week_').last : current_week.first.value
-        @matchups = helpers.espnScores(@week)
+        @week_value = params[:week_id] ? params[:week_id].split('week_').last : current_week.first.value
+        @week_calendar = Calendar.find_by_value(@week_value)
+        @matchups = helpers.espnScores(@week_value)
         @user = current_user
         if @group && @user.groups.include?(@group)
             render inertia: "groups/index", props: {
@@ -11,9 +12,10 @@ class HomeController < ApplicationController
               current_week: current_week.first.value,
               user: @user,
               users: @group.users,
-              week: @week,
-              saved_picks: @group.picks.where(week: @week),
-              saved_games: @group.games.where(week: @week),
+              week: @week_value,
+              week_calendar: @week_calendar,
+              saved_picks: @group.picks.where(week: @week_value),
+              saved_games: @group.games.where(week: @week_value),
               current_group: @group,
               user_groups: current_user.groups,
               current_calendar: current_week.first,
@@ -97,8 +99,9 @@ class HomeController < ApplicationController
     
     def show
         @group = Group.find_by_slug(params[:group_slug])
-        @week = params[:week_id].split('week_').last
-        @matchups = helpers.espnScores(@week)
+        @week_value = params[:week_id].split('week_').last
+        @week_calendar = Calendar.find_by_value(@week_value)
+        @matchups = helpers.espnScores(@week_value)
         @user = params[:user_id] ? User.find(params[:user_id]) : current_user
         if @group && @user.groups.include?(@group)
             render inertia: "matchups/index", props: {
@@ -106,9 +109,10 @@ class HomeController < ApplicationController
                 current_week: current_week.first.value,
                 user: @user,
                 users: @group.users,
-                week: @week,
-                saved_picks: @group.picks.where(week: @week).where(user_id: current_user.id),
-                saved_games: @group.games.where(week: @week),
+                week: @week_value,
+                week_calendar: @week_calendar,
+                saved_picks: @group.picks.where(week: @week_value).where(user_id: current_user.id),
+                saved_games: @group.games.where(week: @week_value),
                 current_group: @group,
                 user_groups: current_user.groups,
                 current_calendar: current_week.first,
