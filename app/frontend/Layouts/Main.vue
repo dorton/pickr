@@ -2,7 +2,7 @@
   <v-layout>
     <v-app-bar :elevation="2">
       <v-app-bar-title>
-        <Link href="/">Pickr</Link>
+        <Link href="/" class="main-header">Sports Ball Pickr</Link>
       </v-app-bar-title>
       <v-spacer></v-spacer>
       <v-menu v-if="user_groups.length > 1">
@@ -98,4 +98,9 @@ export default {
 };
 </script>
 
-<style></style>
+<style>
+a.main-header {
+  color: black;
+  text-decoration: none;
+}
+</style>
