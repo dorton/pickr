@@ -58,7 +58,7 @@
             {{ game.status.type.description }}
           </div>
         </v-card-subtitle>
-        <v-card-text v-if="!isComplete(game) && all_games_pre">
+        <v-card-text v-if="showButton(game, user)">
           {{ currentOdds(game) }}
           <EditOdds :game="game" :saved_games="saved_games" :config="config" />
         </v-card-text>
@@ -164,6 +164,9 @@ export default {
   },
   methods: {
     showButton(_matchup, user) {
+      if (this.admin_override) {
+        return true
+      }
       return user.is_admin && this.all_games_pre
     },
     getSavedOdds(remote_game) {
