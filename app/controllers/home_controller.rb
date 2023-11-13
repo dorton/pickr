@@ -37,17 +37,20 @@ class HomeController < ApplicationController
 
     def manage_groups
         @group = current_user.groups.first
-        @week = params[:week_id] ? params[:week_id].split('week_').last : current_week.first.value
+        @week_value = params[:week_id] ? params[:week_id].split('week_').last : current_week.first.value
+        @week_calendar = Calendar.find_by_value(@week_value)
         @matchups = helpers.espnScores(@week)
         @user = current_user
         if @group
             render inertia: "users/index", props: {
-                user: @user,
+                user: User.includes(:groups).find(@user.id).as_json({groups: :groups}),
                 user_groups: @user.groups,
-                week: @week,
+                week: @week_value,
                 groups: Group.all.where(is_private: false),
                 calendars: Calendar.all,
                 matchups: @matchups,
+                current_calendar: current_week.first,
+                week_calendar: @week_calendar,
               } 
         else
             redirect_to root_url
@@ -149,7 +152,7 @@ class HomeController < ApplicationController
 
     private
     def current_week
-      Calendar.where('? BETWEEN startDate AND endDate', Date.today)
+      Calendar.where('? BETWEEN startDate AND endDate', Time.now)
     end
     
   end

@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid>
+  <v-container fluid full-height>
     <v-row class="justify-center align-center">
       <v-col>
         <div class="d-flex justify-center">
@@ -26,8 +26,8 @@
       <v-table density="compact">
         <thead>
           <tr>
-            <th class="text-left"></th>
-            <th class="text-left"></th>
+            <th v-if="saved_games.length > 0" class="text-left"></th>
+            <th v-if="saved_games.length > 0" class="text-left"></th>
             <th :class="['text-center', handleBgColor(remote_game)]" v-for="remote_game in sorted_headers" :key="remote_game.id">
               <div class="text-body-2" v-if="!isComplete(remote_game)">
                 <div v-if="gameState(remote_game) === 'pre'" class="d-flex flex-column">
@@ -70,8 +70,9 @@
                 </div>
               </div>
             </th>
-            <th class="text-left d-sm-none"></th>
-            <th class="text-left d-sm-none"></th>
+            <th v-if="szn_view" class="text-left d-sm-none"></th>
+            <th class="text-left d-sm-none" v-if="saved_games.length > 0"></th>
+            <th class="text-left d-sm-none" v-if="saved_games.length > 0"></th>
           </tr>
           <tr>
             <th class="text-left text-caption">
@@ -94,7 +95,10 @@
                 </div>
               </div>
             </th>
-            <th class="text-center text-caption text-no-wrap d-sm-none">
+            <th v-if="szn_view">
+              <div>szn</div>
+            </th>
+            <th class="text-center text-caption text-no-wrap d-sm-none" v-if="saved_games.length > 0">
               <div class="d-flex" v-if="!all_games_pre">
                 <div>Pts</div>
                 <div v-if="!all_games_complete">
@@ -102,7 +106,7 @@
                 </div>
               </div>
             </th>
-            <th class="text-left text-caption d-sm-none">
+            <th class="text-left text-caption d-sm-none" v-if="saved_games.length > 0">
             </th>
           </tr>
         </thead>
@@ -123,6 +127,7 @@
                 </div>
               </div>
             </td>
+            <td v-if="szn_view">0</td>
             <td v-if="!all_games_pre" class="text-center text-no-wrap">
               <div class="d-flex">
                 <div>
@@ -159,7 +164,7 @@
                 </div>
               </div>
             </td>
-            <td class="d-sm-none">
+            <td class="d-sm-none" v-if="saved_games.length > 0">
               <div class="text-no-wrap d-flex justify-left align-center" v-if="u.email === user.email">
                 <Link :href="current_pick_url">{{ u.username }}</Link>
               </div>
@@ -219,12 +224,16 @@ export default {
     return {
       selected_calendar: '',
       rows_clicked: [],
+      szn_view: false,
     };
   },
   props: ['matchups', 'current_week', 'user', 'week', 'saved_picks', 'saved_games', 'current_group', 'users', 'user_groups', 'current_calendar', 'calendars'],
   computed: {
     ...mapState(['weekly_picks', 'weekly_games', 'admin_override']),
     ...mapGetters(['all_games_pre', 'all_games_complete']),
+    szn_text() {
+      return this.szn_view ? 'Week View' : 'Season View'
+    },
     sorted_users() {
       return this.users.sort((a,b) => this.getWeeklyPoints(b.id) - this.getWeeklyPoints(a.id))
     },

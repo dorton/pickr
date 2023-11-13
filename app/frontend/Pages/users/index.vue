@@ -19,14 +19,14 @@
         <v-col v-if="user_groups.length < 1" :class="other_text">Looks like you are not in any groups :(</v-col>
         <v-col v-else :class="other_text">Maybe You'd Like To Join Another Group?</v-col>
         <v-col :class="other_text">No Problemo! Pick a public group below to join!</v-col>
-        <div class="d-flex align-center justify-center w-50">
-          <v-select class="" :items="groups" clearable item-value="id" item-title="name" label="Select Public Group"
+        <div :class="['d-flex', 'align-center', 'justify-center', widthClass]">
+        <v-select class="" :items="groups" clearable item-value="id" item-title="name" label="Select Public Group"
             v-model="group_id"></v-select>
           <v-btn @click="joinGroup" color="info" class="mb-4 ml-2" v-if="!!group_id">Join Public Group</v-btn>
         </div>
         <v-col :class="other_text">Or input the code for the private group you would like to join.</v-col>
-        <div class="d-flex align-center justify-center w-50">
-          <v-text-field class="" label="Private Id Code" v-model="private_slug_id" single-line></v-text-field>
+        <div :class="['d-flex', 'align-center', 'justify-center', widthClass]">
+        <v-text-field class="" label="Private Id Code" v-model="private_slug_id" single-line></v-text-field>
           <v-btn @click="joinGroup" color="info" class="mb-4 ml-2" v-if="!!private_slug_id">Join Private Group</v-btn>
         </div>
         <v-col class="text-h6">Don't know the code? Contact the group manager and demand they do their job better!</v-col>
@@ -86,7 +86,12 @@ export default {
   },
   props: ['user', 'week', 'groups', 'calendars', 'user_groups'],
   computed: {
-    ...mapState(['config'])
+    ...mapState(['config']),
+    widthClass() {
+      let { xs } = this.$vuetify.display
+      return xs ? 'w-100' : 'w-50'
+      
+    },
   },
   methods: {
     getGroupUrl(group) {

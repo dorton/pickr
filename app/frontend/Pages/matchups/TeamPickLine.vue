@@ -1,50 +1,52 @@
 <template>
-    <v-row no-gutters align="center" align-content="space-around" v-if="saved_game">
-        <v-col>
-            <div :class="['team', {'team-selected': isSelected('away')}]" @click="setSelection('away')">
-                <div class="team-rank mx-1 d-none d-sm-flex">{{ getTeamRank('away') }}</div>
-                <div class="team-name mx-1">{{ getTeamName('away') }}</div>
-                <div class="team-record mx-1 d-none d-sm-flex">({{ getTeamRecord('away') }})</div>
-            </div>
-        </v-col>
-        <v-col>
-            <div class="odds-wrapper d-sm-flex flex-column flex-sm-row">
-                <div class="favored">{{ favored_team ? favored_team.team.abbreviation : '' }}</div>
-                <div class="odds ml-2">{{ saved_odds }}</div>
-            </div>
-        </v-col>
-        <v-col>
-            <div :class="['team', {'team-selected': isSelected('home')}]" @click="setSelection('home')">
-                <div class="mx-1">@</div>
-                <div class="team-rank mx-1 d-none d-sm-flex">{{ getTeamRank('home') }}</div>
-                <div class="team-name mx-1">{{ getTeamName('home') }}</div>
-                <div class="team-record mx-1 d-none d-sm-flex">({{ getTeamRecord('home') }})</div>
-            </div>
-        </v-col>
-        <v-col class="confidence-wrapper">
-            <div class="confidence">
-                <v-select hide-details :bg-color="handleDropColor" :disabled="shouldDisableDrop" :items="confidence_selections" v-model="confidence" density="compact" flat single-line
-                    variant="outlined" :error="pickTaken">
-                    <template v-slot:item="{ props, item }">
-                        <v-list-item v-bind="props" :color="getActiveColor(item)" :active="isActive(item)" ></v-list-item>
-                      </template>
-                </v-select>
-            </div>
-        </v-col>
-        <!-- <v-col class="d-none d-sm-flex"> -->
-        <v-col :cols="cols">
-            <div class="game-info" v-if="gameState === 'pre'">
-                <div class="time mx-1"> {{ gameTime }} </div>
-                <div class="station mx-1"> {{ gameStation }} </div>
-            </div>
-            <div class="game-info" v-else>
-                <div class="away-score mx-1"> {{ getScore('away') }} </div>
-                <div class="mx-1">-</div>
-                <div class="home-score mx-1"> {{ getScore('home') }} </div>
-            </div>
-        </v-col>
-        <v-divider class="my-2" thickness="3px"></v-divider>
-    </v-row>
+    <span>
+        <v-row no-gutters class="justify-space-around align-center my-2" v-if="saved_game">
+            <v-col>
+                <div :class="['team', {'team-selected': isSelected('away')}]" @click="setSelection('away')">
+                    <div class="team-rank mx-1 d-none d-sm-flex">{{ getTeamRank('away') }}</div>
+                    <div class="team-name mx-1">{{ getTeamName('away') }}</div>
+                    <div class="team-record mx-1 d-none d-sm-flex">({{ getTeamRecord('away') }})</div>
+                </div>
+            </v-col>
+            <v-col>
+                <div class="odds-wrapper d-sm-flex flex-column flex-sm-row justify-sm-space-around">
+                    <div class="favored">{{ favored_team ? favored_team.team.abbreviation : '' }}</div>
+                    <div class="odds">{{ saved_odds }}</div>
+                </div>
+            </v-col>
+            <v-col>
+                <div :class="['team', {'team-selected': isSelected('home')}]" @click="setSelection('home')">
+                    <div class="mx-1">@</div>
+                    <div class="team-rank mx-1 d-none d-sm-flex">{{ getTeamRank('home') }}</div>
+                    <div class="team-name mx-1">{{ getTeamName('home') }}</div>
+                    <div class="team-record mx-1 d-none d-sm-flex">({{ getTeamRecord('home') }})</div>
+                </div>
+            </v-col>
+            <v-col class="confidence-wrapper d-flex justify-center">
+                <div class="confidence">
+                    <v-select hide-details :bg-color="handleDropColor" :disabled="shouldDisableDrop" :items="confidence_selections" v-model="confidence" density="compact" flat single-line
+                        variant="outlined" :error="pickTaken">
+                        <template v-slot:item="{ props, item }">
+                            <v-list-item v-bind="props" :color="getActiveColor(item)" :active="isActive(item)" ></v-list-item>
+                          </template>
+                    </v-select>
+                </div>
+            </v-col>
+            <!-- <v-col class="d-none d-sm-flex"> -->
+            <v-col :cols="cols" class="">
+                <div class="game-info d-flex justify-start" v-if="gameState === 'pre'">
+                    <div class="time mx-1"> {{ gameTime }} </div>
+                    <div class="station mx-1"> {{ gameStation }} </div>
+                </div>
+                <div class="game-info d-flex justify-start" v-else>
+                    <div class="away-score mx-1"> {{ getScore('away') }} </div>
+                    <div class="mx-1">-</div>
+                    <div class="home-score mx-1"> {{ getScore('home') }} </div>
+                </div>
+            </v-col>
+        </v-row>
+        <v-divider class="" thickness="3px"></v-divider>
+    </span>
 </template>
 <script>
 import moment from 'moment'
@@ -88,7 +90,7 @@ export default {
         ...mapGetters(['all_games_pre']),
         cols () {
             const { xs } = this.$vuetify.display
-            return xs ? 12 : 'auto'
+            return xs ? 12 : ''
         },
         handleDropColor() {
             if (this.gameState !== 'post') {
@@ -278,17 +280,13 @@ export default {
 .team-record {}
 
 .odds-wrapper {
-    display: flex;
-    justify-content: center;
 }
 .odds {
     text-align: center;
 }
 
 .confidence-wrapper {
-    display: flex;
-    justify-content: center;
-    max-height: 60px;
+
 }
 
 .confidence {
@@ -296,9 +294,7 @@ export default {
 }
 
 .game-info {
-    display: flex;
-    align-items: right;
-    align-self: right;
+
 }
 .team-selected {
     background: blue;

@@ -1,5 +1,5 @@
 <template>
-  <v-layout>
+  <v-layout class="h-screen">
     <v-app-bar :elevation="2">
       <v-app-bar-title>
         <Link href="/" class="main-header">Sports Ball Pickr</Link>

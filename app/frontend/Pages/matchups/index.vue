@@ -1,5 +1,5 @@
 <template>
-    <v-container>
+    <v-container class="h-75">
       <v-row class="justify-center align-center">
         <v-col>
           <v-btn variant="outlined" color="info" @click="backToGroup">Back</v-btn>
@@ -23,7 +23,7 @@
           ></v-select>
         </v-col>
       </v-row>
-      <v-row>
+      <v-row v-if="weekly_games.length > 0">
         <v-col>
           <v-card-title>
             <div class="title-wrapper">
@@ -38,6 +38,9 @@
             </v-card-text>
           </v-card>
         </v-col>
+      </v-row>
+      <v-row v-else class="align-center justify-center fill-height">
+        <div class="text-h4 text-center">Games For This Week Not Selected</div>
       </v-row>
       <v-row class="d-sm-none">
         <v-col>
