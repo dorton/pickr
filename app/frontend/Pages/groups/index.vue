@@ -107,7 +107,7 @@
           </tr>
         </thead>
         <tbody class="pb-4">
-          <tr v-for="u in sorted_users" :key="u.id">
+          <tr v-for="u in sorted_users" :key="u.id" :class="{'bg-blue-lighten-5': handleRowClass(u.id)}" @click="handleRowClick(u.id)">
             <td>
               <div class="text-no-wrap d-flex justify-left align-center" v-if="u.email === user.email">
                 <Link :href="current_pick_url">{{ u.username }}</Link>
@@ -218,6 +218,7 @@ export default {
   data() {
     return {
       selected_calendar: '',
+      rows_clicked: [],
     };
   },
   props: ['matchups', 'current_week', 'user', 'week', 'saved_picks', 'saved_games', 'current_group', 'users', 'user_groups', 'current_calendar', 'calendars'],
@@ -250,6 +251,17 @@ export default {
     }
   },
   methods: {
+    handleRowClass(id) {
+      return this.rows_clicked.includes(id)
+    },
+    handleRowClick(id) {
+      let index = this.rows_clicked.findIndex(r => r === id)
+      if (index > -1) {
+        this.rows_clicked.splice(index, 1)
+      } else {
+        this.rows_clicked.push(id)
+      }
+    },
     getBroadcast(remote_game) {
       let comps = remote_game.competitions
       if (comps && comps.length > 0) {
