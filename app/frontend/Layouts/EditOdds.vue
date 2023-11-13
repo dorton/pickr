@@ -17,6 +17,7 @@
 <script>
 import axios from 'axios'
 import { mapState } from 'vuex'
+import { router } from '@inertiajs/vue3'
 export default {
     props: ['game', 'saved_games', 'config'],
     data() {
@@ -49,7 +50,9 @@ export default {
     methods: {
         submit() {
             if (this.odds !== null && this.favored_team_id !== null) {
-                axios.patch(`/games/${this.saved_game.id}`, {game: {odds: this.odds, favored_team_id: this.favored_team_id}}, this.config)
+                axios.patch(`/games/${this.saved_game.id}`, {game: {odds: this.odds, favored_team_id: this.favored_team_id}}, this.config).then(r => {
+                    router.reload()
+                })
             }
         }
     },

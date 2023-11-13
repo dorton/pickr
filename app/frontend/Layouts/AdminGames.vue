@@ -139,6 +139,7 @@ import EditOdds from './EditOdds.vue'
 import { mapState, mapGetters } from 'vuex'
 import moment from 'moment'
 import axios from 'axios'
+import { router } from '@inertiajs/vue3'
 export default {
   name: "AdminGames",
   components: {
@@ -227,17 +228,17 @@ export default {
         if (this.gameInWeek(game)) {
           this.$store.commit('spliceWeeklyGames', this.gmIndex(game))
         }
+        router.reload()
       })
     },
     addGame(game) {
       if (this.weekly_games.length < 10) {
         let data = { game: { week: this.handleWeek, remote_game_id: game.id, set_odds: null }, group: this.current_group }
-        console.log('data: ', data);
         axios.post('/games', data, this.config).then(r => {
-          console.log('response: ', r.data);
           if (!this.gameInWeek(game) && this.weekly_games.length < 10) {
             this.$store.commit('pushWeeklyGames', game)
           }
+          router.reload()
   
         })
       }

@@ -11,131 +11,174 @@
           <div class="text-h4">{{ getCalendarDetail }}</div>
         </div>
       </v-col>
-      <v-col>
-        <v-select :items="calendars" item-value="value" item-title="label" v-model="selected_calendar"
+      <v-col class="d-none d-sm-flex">
+        <v-select hide-details density="compact" flat single-line :items="calendars" item-value="value" item-title="label" v-model="selected_calendar"
           @update:modelValue="navToWeek"></v-select>
       </v-col>
     </v-row>
-    <v-table density="compact">
-      <thead>
-        <tr>
-          <th class="text-left">
+    <v-row class="d-sm-none">
+      <v-col>
+        <v-select hide-details density="compact" flat single-line :items="calendars" item-value="value" item-title="label" v-model="selected_calendar"
+          @update:modelValue="navToWeek"></v-select>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-table density="compact">
+        <thead>
+          <tr>
+            <th class="text-left"></th>
+            <th class="text-left"></th>
+            <th :class="['text-center', handleBgColor(remote_game)]" v-for="remote_game in sorted_headers" :key="remote_game.id">
+              <div class="text-body-2" v-if="!isComplete(remote_game)">
+                <div v-if="gameState(remote_game) === 'pre'" class="d-flex flex-column">
+                  <div class="score-wrapper">
+                    {{ remote_game.shortName }}
+                  </div>
+                  <div class="description-wrapper">
+                    <div> {{ getBroadcast(remote_game) }}</div>
+                    <div>{{ getTime(remote_game.date) }}</div>
+                  </div>
+                </div>
+                <div v-else :class="['d-flex', 'flex-column', 'ma-2', 'font-weight-bold']">
+                  <div class="score-wrapper">
+                    <div v-for="(homeAway,i) in ['away', 'home']" :key="i" class="d-flex justify-space-between">
+                      <div class="">{{ getTeam(remote_game, homeAway) ? getTeam(remote_game, homeAway).team.abbreviation : 'No Game' }}</div>
+                      <div class="ml-2">{{ getScore(remote_game, homeAway) }}</div>
+                    </div>
+                  </div>
+                  <div class="description-wrapper text-no-wrap">
+                    <div> {{ remote_game.competitions[0].broadcasts[0].names[0] }}</div>
+                    <div>{{ remote_game.status.type.shortDetail }}</div>
+                  </div>
+                </div>
+              </div>
+              <div class="text-body-2 ma-2" v-if="isComplete(remote_game)">
+                <div class="d-flex flex-column">
+                  <div class="score-wrapper">
+                    <div class="d-flex justify-space-between">
+                      <div class="">{{ getTeam(remote_game, 'away') ? getTeam(remote_game, 'away').team.abbreviation : 'No Game' }}</div>
+                      <div class="ml-2">{{ getScore(remote_game, 'away') }}</div>
+                    </div>
+                    <div class="d-flex justify-space-between">
+                      <div class="">{{ getTeam(remote_game, 'home') ? getTeam(remote_game, 'home').team.abbreviation : 'No Game' }}</div>
+                      <div class="ml-2">{{ getScore(remote_game, 'home') }}</div>
+                    </div>
+                  </div>
+                  <div class="description-wrapper text-no-wrap">
+                    <div>{{ remote_game.status.type.shortDetail }}</div>
+                  </div>
+                </div>
+              </div>
+            </th>
+            <th class="text-left d-sm-none"></th>
+            <th class="text-left d-sm-none"></th>
+          </tr>
+          <tr>
+            <th class="text-left text-caption">
+            </th>
+            <th class="text-center text-caption text-no-wrap">
+              <div class="d-flex" v-if="!all_games_pre">
+                <div>Pts</div>
+                <div v-if="!all_games_complete">
+                  <span class="mx-1">|</span> <span>Max</span>
+                </div>
+              </div>
+            </th>
+            <th :class="['text-center', handleBgColor(header)]" v-for="header in sorted_headers" :key="header.id">
+              <div class="table-odds-wrapper d-flex justify-center">
+                <div class="text-caption fav mr-1">
+                  {{ getFavoredTeam(header) ? getFavoredTeam(header).team.abbreviation : 'No Team' }}
+                </div>
+                <div class="text-caption odds">
+                  {{ getSavedOdds(header) }}
+                </div>
+              </div>
+            </th>
+            <th class="text-center text-caption text-no-wrap d-sm-none">
+              <div class="d-flex" v-if="!all_games_pre">
+                <div>Pts</div>
+                <div v-if="!all_games_complete">
+                  <span class="mx-1">|</span> <span>Max</span>
+                </div>
+              </div>
+            </th>
+            <th class="text-left text-caption d-sm-none">
+            </th>
+          </tr>
+        </thead>
+        <tbody class="pb-4">
+          <tr v-for="u in sorted_users" :key="u.id">
+            <td>
+              <div class="text-no-wrap d-flex justify-left align-center" v-if="u.email === user.email">
+                <Link :href="current_pick_url">{{ u.username }}</Link>
+              </div>
+              <div v-else>
+                <div class="d-flex justify-left align-center">
+                  <div class="text-caption mr-2" v-if="user.is_admin && admin_override">
+                    <Link :href="admin_edit_url(u.id)">edit</Link>
+                  </div>
+                  <div class="text-no-wrap">
+                    {{ u.username }}
+                  </div>
+                </div>
+              </div>
+            </td>
+            <td v-if="!all_games_pre" class="text-center text-no-wrap">
+              <div class="d-flex">
+                <div>
+                  {{ getWeeklyPoints(u.id) }}
+                </div>
+                <div v-if="getWeeklyMaxPoints(u.id) > 0">
+                  <span class="mx-1">|</span><span>{{ getWeeklyMaxPoints(u.id) }}</span>
+                </div>
+              </div>
+            </td>
+            <td v-if="all_games_pre" class="text-left">
+              <div :class="[allGamesPickedClass(u.id), 'text-no-wrap']">
+                {{ allGamesPickedText(u.id) }}
+              </div>
+            </td>
+            <td v-for="remote_game in sorted_headers" :key="remote_game.id">
+              <div :class="['d-flex flex-column align-center mt-1', handleScoreClass(remote_game, u.id)]" v-if="!all_games_pre">
+                <div class="team-pick">
+                  {{ getTeamPickFromRemote(remote_game, u.id) ? getTeamPickFromRemote(remote_game, u.id).team.abbreviation : 'No Pick' }}
+                </div>
+                <div class="confidence">
+                  {{ getConfidenceFromRemote(remote_game, u.id) | '' }}
+                </div>
+              </div>
+            </td>
 
-          </th>
-          <th class="text-left">
-
-          </th>
-          <th :class="['text-center', handleBgColor(remote_game)]" v-for="remote_game in sorted_headers" :key="remote_game.id">
-            <div class="text-body-2" v-if="!isComplete(remote_game)">
-              <div v-if="gameState(remote_game) === 'pre'" class="d-flex flex-column">
-                <div class="score-wrapper">
-                  {{ remote_game.shortName }}
+            <td v-if="!all_games_pre" class="text-center text-no-wrap d-sm-none">
+              <div class="d-flex">
+                <div>
+                  {{ getWeeklyPoints(u.id) }}
                 </div>
-                <div class="description-wrapper">
-                  <div> {{ getBroadcast(remote_game) }}</div>
-                  <div>{{ getTime(remote_game.date) }}</div>
+                <div v-if="getWeeklyMaxPoints(u.id) > 0">
+                  <span class="mx-1">|</span><span>{{ getWeeklyMaxPoints(u.id) }}</span>
                 </div>
               </div>
-              <div v-else :class="['d-flex', 'flex-column', 'ma-2', 'font-weight-bold']">
-                <div class="score-wrapper">
-                  <div v-for="(homeAway,i) in ['away', 'home']" :key="i" class="d-flex justify-space-between">
-                    <div class="">{{ getTeam(remote_game, homeAway) ? getTeam(remote_game, homeAway).team.abbreviation : 'No Game' }}</div>
-                    <div class="ml-2">{{ getScore(remote_game, homeAway) }}</div>
+            </td>
+            <td class="d-sm-none">
+              <div class="text-no-wrap d-flex justify-left align-center" v-if="u.email === user.email">
+                <Link :href="current_pick_url">{{ u.username }}</Link>
+              </div>
+              <div v-else>
+                <div class="d-flex justify-left align-center">
+                  <div class="text-caption mr-2" v-if="user.is_admin && admin_override">
+                    <Link :href="admin_edit_url(u.id)">edit</Link>
+                  </div>
+                  <div class="text-no-wrap">
+                    {{ u.username }}
                   </div>
                 </div>
-                <div class="description-wrapper text-no-wrap">
-                  <div> {{ remote_game.competitions[0].broadcasts[0].names[0] }}</div>
-                  <div>{{ remote_game.status.type.shortDetail }}</div>
-                </div>
               </div>
-            </div>
-            <div class="text-body-2 ma-2" v-if="isComplete(remote_game)">
-              <div class="d-flex flex-column">
-                <div class="score-wrapper">
-                  <div class="d-flex justify-space-between">
-                    <div class="">{{ getTeam(remote_game, 'away') ? getTeam(remote_game, 'away').team.abbreviation : 'No Game' }}</div>
-                    <div class="ml-2">{{ getScore(remote_game, 'away') }}</div>
-                  </div>
-                  <div class="d-flex justify-space-between">
-                    <div class="">{{ getTeam(remote_game, 'home') ? getTeam(remote_game, 'home').team.abbreviation : 'No Game' }}</div>
-                    <div class="ml-2">{{ getScore(remote_game, 'home') }}</div>
-                  </div>
-                </div>
-                <div class="description-wrapper text-no-wrap">
-                  <div>{{ remote_game.status.type.shortDetail }}</div>
-                </div>
-              </div>
-            </div>
-          </th>
-        </tr>
-        <tr>
-          <th class="text-left text-caption">
-          </th>
-          <th class="text-center text-caption text-no-wrap">
-            <div class="d-flex" v-if="!all_games_pre">
-              <div>Pts</div>
-              <div v-if="!all_games_complete">
-                <span class="mx-1">|</span> <span>Max</span>
-              </div>
-            </div>
-          </th>
-          <th :class="['text-center', handleBgColor(header)]" v-for="header in sorted_headers" :key="header.id">
-            <div class="table-odds-wrapper d-flex justify-center">
-              <div class="text-caption fav mr-1">
-                {{ getFavoredTeam(header) ? getFavoredTeam(header).team.abbreviation : 'No Team' }}
-              </div>
-              <div class="text-caption odds">
-                {{ getSavedOdds(header) }}
-              </div>
-            </div>
-          </th>
-        </tr>
-      </thead>
-      <tbody class="pb-4">
-        <tr v-for="u in sorted_users" :key="u.id">
-          <td>
-            <div class="text-no-wrap d-flex justify-left align-center" v-if="u.email === user.email">
-              <Link :href="current_pick_url">{{ u.username }}</Link>
-            </div>
-            <div v-else>
-              <div class="d-flex justify-left align-center">
-                <div class="text-caption mr-2" v-if="user.is_admin && admin_override">
-                  <Link :href="admin_edit_url(u.id)">edit</Link>
-                </div>
-                <div class="text-no-wrap">
-                  {{ u.username }}
-                </div>
-              </div>
-            </div>
-          </td>
-          <td v-if="!all_games_pre" class="text-center text-no-wrap">
-            <div class="d-flex">
-              <div>
-                {{ getWeeklyPoints(u.id) }}
-              </div>
-              <div v-if="getWeeklyMaxPoints(u.id) > 0">
-                <span class="mx-1">|</span><span>{{ getWeeklyMaxPoints(u.id) }}</span>
-              </div>
-            </div>
-          </td>
-          <td v-if="all_games_pre" class="text-left">
-            <div :class="[allGamesPickedClass(u.id), 'text-no-wrap']">
-              {{ allGamesPickedText(u.id) }}
-            </div>
-          </td>
-          <td v-for="remote_game in sorted_headers" :key="remote_game.id">
-            <div :class="['d-flex flex-column align-center mt-1', handleScoreClass(remote_game, u.id)]" v-if="!all_games_pre">
-              <div class="team-pick">
-                {{ getTeamPickFromRemote(remote_game, u.id) ? getTeamPickFromRemote(remote_game, u.id).team.abbreviation : 'No Pick' }}
-              </div>
-              <div class="confidence">
-                {{ getConfidenceFromRemote(remote_game, u.id) | '' }}
-              </div>
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </v-table>
+            </td>
+            
+          </tr>
+        </tbody>
+      </v-table>
+    </v-row>
   </v-container>
 </template>
 

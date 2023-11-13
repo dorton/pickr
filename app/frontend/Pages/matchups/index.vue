@@ -2,15 +2,19 @@
     <v-container>
       <v-row class="justify-center align-center">
         <v-col>
-          <v-btn color="success" @click="backToGroup">Back To Group</v-btn>
+          <v-btn variant="outlined" color="info" @click="backToGroup">Back</v-btn>
         </v-col>
         <v-col>
           <div class="d-flex justify-center">
             <div class="text-h4">{{ getCalendarDetail }}</div>
           </div>
         </v-col>
-        <v-col>
+        <v-col class="d-none d-sm-flex">
           <v-select
+            hide-details
+            density="compact" 
+            flat 
+            single-line
             :items="calendars"
             item-value="value"
             item-title="label"
@@ -33,6 +37,21 @@
                 @confChange="setConf" :week="handleWeek" :saved_game="getSavedGame(game)" :admin_override="admin_override" :user="user" />
             </v-card-text>
           </v-card>
+        </v-col>
+      </v-row>
+      <v-row class="d-sm-none">
+        <v-col>
+          <v-select
+            hide-details
+            density="compact" 
+            flat 
+            single-line
+            :items="calendars"
+            item-value="value"
+            item-title="label"
+            v-model="selected_calendar"
+            @update:modelValue="navToWeek"
+          ></v-select>
         </v-col>
       </v-row>
     </v-container>

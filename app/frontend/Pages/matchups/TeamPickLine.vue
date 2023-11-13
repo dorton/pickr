@@ -1,14 +1,14 @@
 <template>
-    <v-row dense align="center" align-content="space-around" v-if="saved_game">
+    <v-row no-gutters align="center" align-content="space-around" v-if="saved_game">
         <v-col>
             <div :class="['team', {'team-selected': isSelected('away')}]" @click="setSelection('away')">
-                <div class="team-rank mx-1">{{ getTeamRank('away') }}</div>
+                <div class="team-rank mx-1 d-none d-sm-flex">{{ getTeamRank('away') }}</div>
                 <div class="team-name mx-1">{{ getTeamName('away') }}</div>
-                <div class="team-record mx-1">({{ getTeamRecord('away') }})</div>
+                <div class="team-record mx-1 d-none d-sm-flex">({{ getTeamRecord('away') }})</div>
             </div>
         </v-col>
         <v-col>
-            <div class="odds-wrapper">
+            <div class="odds-wrapper d-sm-flex flex-column flex-sm-row">
                 <div class="favored">{{ favored_team ? favored_team.team.abbreviation : '' }}</div>
                 <div class="odds ml-2">{{ saved_odds }}</div>
             </div>
@@ -16,14 +16,14 @@
         <v-col>
             <div :class="['team', {'team-selected': isSelected('home')}]" @click="setSelection('home')">
                 <div class="mx-1">@</div>
-                <div class="team-rank mx-1">{{ getTeamRank('home') }}</div>
+                <div class="team-rank mx-1 d-none d-sm-flex">{{ getTeamRank('home') }}</div>
                 <div class="team-name mx-1">{{ getTeamName('home') }}</div>
-                <div class="team-record mx-1">({{ getTeamRecord('home') }})</div>
+                <div class="team-record mx-1 d-none d-sm-flex">({{ getTeamRecord('home') }})</div>
             </div>
         </v-col>
         <v-col class="confidence-wrapper">
             <div class="confidence">
-                <v-select :bg-color="handleDropColor" :disabled="shouldDisableDrop" :items="confidence_selections" v-model="confidence" density="compact" flat single-line
+                <v-select hide-details :bg-color="handleDropColor" :disabled="shouldDisableDrop" :items="confidence_selections" v-model="confidence" density="compact" flat single-line
                     variant="outlined" :error="pickTaken">
                     <template v-slot:item="{ props, item }">
                         <v-list-item v-bind="props" :color="getActiveColor(item)" :active="isActive(item)" ></v-list-item>
@@ -31,7 +31,8 @@
                 </v-select>
             </div>
         </v-col>
-        <v-col>
+        <!-- <v-col class="d-none d-sm-flex"> -->
+        <v-col :cols="cols">
             <div class="game-info" v-if="gameState === 'pre'">
                 <div class="time mx-1"> {{ gameTime }} </div>
                 <div class="station mx-1"> {{ gameStation }} </div>
@@ -42,7 +43,7 @@
                 <div class="home-score mx-1"> {{ getScore('home') }} </div>
             </div>
         </v-col>
-        <v-divider thickness="3px"></v-divider>
+        <v-divider class="my-2" thickness="3px"></v-divider>
     </v-row>
 </template>
 <script>
@@ -85,6 +86,10 @@ export default {
     },
     computed: {
         ...mapGetters(['all_games_pre']),
+        cols () {
+            const { xs } = this.$vuetify.display
+            return xs ? 12 : 'auto'
+        },
         handleDropColor() {
             if (this.gameState !== 'post') {
                 return ''
@@ -263,7 +268,7 @@ export default {
     border: 1px solid black;
     border-radius: 5px;
     cursor: pointer;
-    min-height: 45px;
+    min-height: 40px;
 }
 
 .team-rank {}
@@ -287,7 +292,6 @@ export default {
 }
 
 .confidence {
-    padding-top: 3px;
     max-width: 85px;
 }
 
