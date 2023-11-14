@@ -264,10 +264,13 @@ export default {
       return this.saved_games.map(g => this.matchups.events.find(e => e.id === g.remote_game_id.toString()))
     },
     sorted_headers () {
-      return this.headers.sort((a,b) => this.matchups.events.findIndex(e=>e.id === a.id) - this.matchups.events.findIndex(e=>e.id === b.id))
+      return this.headers.sort((a,b) => this.findIndex(a.id) - this.findIndex(b.id))
     }
   },
   methods: {
+    findIndex (id) {
+      return this.matchups.events.findIndex(e=>e.id === id)
+    },
     handleRowClass(id) {
       return this.rows_clicked.includes(id)
     },

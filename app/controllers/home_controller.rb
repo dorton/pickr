@@ -7,6 +7,7 @@ class HomeController < ApplicationController
         @week_calendar = Calendar.find_by_value(@week_value)
         @matchups = helpers.espnScores(@week_value)
         @user = current_user
+                
         if @group && @user.groups.include?(@group)
             render inertia: "groups/index", props: {
               matchups: @matchups,

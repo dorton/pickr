@@ -1,63 +1,52 @@
 <template>
-    <v-container class="h-75">
-      <v-row class="justify-center align-center">
-        <v-col>
-          <v-btn variant="outlined" color="info" @click="backToGroup">Back</v-btn>
-        </v-col>
-        <v-col>
-          <div class="d-flex justify-center">
-            <div class="text-h4">{{ getCalendarDetail }}</div>
+  <v-container class="h-75">
+    <v-row class="justify-center align-center">
+      <v-col>
+        <v-btn variant="outlined" color="info" @click="backToGroup">Back</v-btn>
+      </v-col>
+      <v-col>
+        <div class="d-flex justify-center">
+          <div class="text-h4">{{ getCalendarDetail }}</div>
+        </div>
+      </v-col>
+      <v-col class="d-none d-sm-flex">
+        <v-select hide-details density="compact" flat single-line :items="calendars" item-value="value" item-title="label"
+          v-model="selected_calendar" @update:modelValue="navToWeek"></v-select>
+      </v-col>
+    </v-row>
+    <v-row v-if="weekly_games.length > 0">
+      <v-col>
+        <v-card-title>
+          <div class="title-wrapper">
+            <div class="title">{{ user.username }} Picks</div>
+            <div class="submit" v-if="canSubmit"><v-btn :loading="loading" color="success"
+                @click="handleSubmit()">{{ button_text }}</v-btn></div>
           </div>
-        </v-col>
-        <v-col class="d-none d-sm-flex">
-          <v-select
-            hide-details
-            density="compact" 
-            flat 
-            single-line
-            :items="calendars"
-            item-value="value"
-            item-title="label"
-            v-model="selected_calendar"
-            @update:modelValue="navToWeek"
-          ></v-select>
-        </v-col>
-      </v-row>
-      <v-row v-if="weekly_games.length > 0">
-        <v-col>
-          <v-card-title>
-            <div class="title-wrapper">
-              <div class="title">{{ user.username }} Picks</div>
-              <div class="submit" v-if="canSubmit"><v-btn :loading="loading" color="success" @click="handleSubmit()">{{button_text}}</v-btn></div>
-            </div>
-          </v-card-title>
-          <v-card flat color="grey-lighten-4">
-            <v-card-text>
-              <TeamPickLine v-for="game in weekly_games" :key="game.id" :remote_game="game" :picks="weekly_picks"
-                @confChange="setConf" :week="handleWeek" :saved_game="getSavedGame(game)" :admin_override="admin_override" :user="user" />
+        </v-card-title>
+        <div v-for="(day, gd_index) in game_dates" :key="gd_index">
+          <div :class="['text-subtitle-1', mobile ? '' : 'text-right', 'bg-grey-darken-2', 'px-3', 'py-1', 'font-weight-bold']">{{ day }}</div>
+          <v-card color="grey-lighten-4" class="mb-2" elevation="5">
+            <v-card-text class="team-pick-card">
+              <TeamPickLine v-for="(game, i) in gamesOnDay(day)" :key="game.id" :remote_game="game" :picks="weekly_picks"
+                @confChange="setConf" :week="handleWeek" :saved_game="getSavedGame(game)" :admin_override="admin_override"
+                :user="user">
+                <v-divider v-if="i + 1 !== gamesOnDay(day).length" class="" thickness="3px"></v-divider>
+              </TeamPickLine>
             </v-card-text>
           </v-card>
-        </v-col>
-      </v-row>
-      <v-row v-else class="align-center justify-center fill-height">
-        <div class="text-h4 text-center">Games For This Week Not Selected</div>
-      </v-row>
-      <v-row class="d-sm-none">
-        <v-col>
-          <v-select
-            hide-details
-            density="compact" 
-            flat 
-            single-line
-            :items="calendars"
-            item-value="value"
-            item-title="label"
-            v-model="selected_calendar"
-            @update:modelValue="navToWeek"
-          ></v-select>
-        </v-col>
-      </v-row>
-    </v-container>
+        </div>
+      </v-col>
+    </v-row>
+    <v-row v-else class="align-center justify-center fill-height">
+      <div class="text-h4 text-center">Games For This Week Not Selected</div>
+    </v-row>
+    <v-row class="d-sm-none">
+      <v-col>
+        <v-select hide-details density="compact" flat single-line :items="calendars" item-value="value" item-title="label"
+          v-model="selected_calendar" @update:modelValue="navToWeek"></v-select>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
   
 <script>
@@ -68,7 +57,7 @@ import TeamPickLine from './TeamPickLine.vue'
 import { mapState } from 'vuex'
 import { router } from '@inertiajs/vue3'
 export default {
-  props: ['matchups', 'user', 'week', 'current_group', 'current_week', 'users', 'saved_games', 'saved_picks', 'calendars', 'current_calendar', ],
+  props: ['matchups', 'user', 'week', 'current_group', 'current_week', 'users', 'saved_games', 'saved_picks', 'calendars', 'current_calendar',],
   components: {
     Link,
     TeamPickLine,
@@ -93,7 +82,7 @@ export default {
   created() {
     this.selected_calendar = this.week
     this.$store.commit('setMatchups', this.matchups)
-    this.$store.commit('setWeeklyPicks', []) 
+    this.$store.commit('setWeeklyPicks', [])
     if (this.saved_picks && this.saved_picks.length > 0) {
       this.saved_picks.forEach(pick => {
         if (!this.gameInConf(pick)) {
@@ -114,6 +103,13 @@ export default {
     }
   },
   computed: {
+    mobile () {
+        const { xs } = this.$vuetify.display
+        return xs
+    },
+    sorted_games() {
+      return this.weekly_games.sort((a, b) => this.findIndex(a.id) - this.findIndex(b.id))
+    },
     group_url() {
       return `/${this.current_group.slug}/week_${this.selected_calendar}`
     },
@@ -156,9 +152,21 @@ export default {
         return this.week
       }
       return this.week[0].value
+    },
+    game_dates() {
+      return [...new Set(this.sorted_games.map(e => this.formatDate(e.date)))]
     }
   },
   methods: {
+    gamesOnDay(day) {
+      return this.sorted_games.filter(e => day === this.formatDate(e.date))
+    },
+    formatDate(date) {
+      return moment(date).format('dddd, MMMM Do')
+    },
+    findIndex(id) {
+      return this.matchups.events.findIndex(e => e.id === id)
+    },
     // checkUrl() {
     //   let params = window.location.search
     //   if (params === '?force') {
@@ -214,7 +222,7 @@ export default {
       if (!this.gameInConf(pick)) {
         this.$store.commit('pushWeeklyPicks', pick)
       } else {
-        this.$store.commit('spliceWeeklyPicks', {pick: pick, index: this.getConfIndex(pick)})
+        this.$store.commit('spliceWeeklyPicks', { pick: pick, index: this.getConfIndex(pick) })
       }
     },
     manageWeeklyGames(game) {
@@ -252,11 +260,9 @@ export default {
           if (!this.gameInWeek(game) && this.weekly_games.length < 10) {
             this.weekly_games.push(game)
           }
-  
         })
       }
     },
-    
     getTeam(homeAway, matchup) {
       return matchup.competitions[0].competitors.find(c => c.homeAway === homeAway)
     },
@@ -333,6 +339,10 @@ export default {
 }
 </script>
 <style>
+.v-card-text.team-pick-card {
+  padding: 0rem 1rem 0rem 1rem;
+}
+
 .title-wrapper {
   display: flex;
   align-items: center;

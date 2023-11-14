@@ -10,24 +10,13 @@
     <v-list-item v-for="game in weekly_games" :key="game.remote_game_id" v-if="user.is_admin">
       <v-card variant="tonal">
         <v-card-title>
-            <div v-if="!isComplete(game)">
-              <div class="text-body-2" v-if="all_games_pre">
-                {{ getTeamName('away', game) }} {{ getTeamRank('away', game) }} @ {{ getTeamName('home', game) }}
-                {{
-                  getTeamRank('home', game) }}
-              </div>
-              <div class="text-body-2" v-else>
-                <div class="d-flex justify-space-between">
-                  <div class="">{{ getTeamName('away', game) }}</div>
-                  <div class="">{{ getScore('away', game) }}</div>
-                </div>
-                <div class="d-flex justify-space-between">
-                  <div class="">{{ getTeamName('home', game) }}</div>
-                  <div class="">{{ getScore('home', game) }}</div>
-                </div>
-              </div>
+          <div v-if="!isComplete(game)">
+            <div class="text-body-2" v-if="all_games_pre">
+              {{ getTeamName('away', game) }} {{ getTeamRank('away', game) }} @ {{ getTeamName('home', game) }}
+              {{
+                getTeamRank('home', game) }}
             </div>
-            <div class="text-body-2" v-if="isComplete(game)">
+            <div class="text-body-2" v-else>
               <div class="d-flex justify-space-between">
                 <div class="">{{ getTeamName('away', game) }}</div>
                 <div class="">{{ getScore('away', game) }}</div>
@@ -37,6 +26,17 @@
                 <div class="">{{ getScore('home', game) }}</div>
               </div>
             </div>
+          </div>
+          <div class="text-body-2" v-if="isComplete(game)">
+            <div class="d-flex justify-space-between">
+              <div class="">{{ getTeamName('away', game) }}</div>
+              <div class="">{{ getScore('away', game) }}</div>
+            </div>
+            <div class="d-flex justify-space-between">
+              <div class="">{{ getTeamName('home', game) }}</div>
+              <div class="">{{ getScore('home', game) }}</div>
+            </div>
+          </div>
         </v-card-title>
         <v-card-subtitle>
           <div v-if="!isComplete(game)">
@@ -75,61 +75,73 @@
       </v-card>
     </v-list-item>
     <v-divider></v-divider>
-    <v-list-item title="All Games">
+    <v-list-item v-if="conferences">
+      <v-expansion-panels>
+        <v-expansion-panel>
+          <v-expansion-panel-title>All Games</v-expansion-panel-title>
+          <v-expansion-panel-text class="filter-expansion">
+            <v-text-field clearable placeholder="Search Games" hide-details density="compact" flat v-model="search"></v-text-field>
+            <v-select placeholder="Filter Conference" clearable hide-details density="compact" flat single-line
+              :items="conferences" v-model="conf_name" item-value="id" item-title="name"></v-select>
+          </v-expansion-panel-text>
+        </v-expansion-panel>
+      </v-expansion-panels>
     </v-list-item>
-    <v-list-item v-for="matchup in events" :key="matchup.id">
-      <v-card variant="tonal">
-        <v-card-title>
-          <div v-if="!isComplete(matchup)">
-            <div class="text-body-2" v-if="gameState(matchup) === 'pre'">
-              {{ getTeamName('away', matchup) }} {{ getTeamRank('away', matchup) }} @ {{ getTeamName('home', matchup) }}
-              {{
-                getTeamRank('home', matchup) }}
-            </div>
-            <div class="text-body-2" v-else>
-              <div class="d-flex justify-space-between">
-                <div class="">{{ getTeamName('away', matchup) }}</div>
-                <div class="">{{ getScore('away', matchup) }}</div>
+    <v-list-item v-for="(day, i) in game_dates" :key="i" :title="day">
+        <v-list-item class="px-0" v-for="matchup in gamesOnDay(day)" :key="matchup.id">
+          <v-card variant="tonal">
+            <v-card-title>
+              <div v-if="!isComplete(matchup)">
+                <div class="text-body-2" v-if="gameState(matchup) === 'pre'">
+                  {{ getTeamName('away', matchup) }} {{ getTeamRank('away', matchup) }} @ {{ getTeamName('home', matchup) }}
+                  {{
+                    getTeamRank('home', matchup) }}
+                </div>
+                <div class="text-body-2" v-else>
+                  <div class="d-flex justify-space-between">
+                    <div class="">{{ getTeamName('away', matchup) }}</div>
+                    <div class="">{{ getScore('away', matchup) }}</div>
+                  </div>
+                  <div class="d-flex justify-space-between">
+                    <div class="">{{ getTeamName('home', matchup) }}</div>
+                    <div class="">{{ getScore('home', matchup) }}</div>
+                  </div>
+                </div>
               </div>
-              <div class="d-flex justify-space-between">
-                <div class="">{{ getTeamName('home', matchup) }}</div>
-                <div class="">{{ getScore('home', matchup) }}</div>
+              <div class="text-body-2" v-if="isComplete(matchup)">
+                <div class="d-flex justify-space-between">
+                  <div class="">{{ getTeamName('away', matchup) }}</div>
+                  <div class="">{{ getScore('away', matchup) }}</div>
+                </div>
+                <div class="d-flex justify-space-between">
+                  <div class="">{{ getTeamName('home', matchup) }}</div>
+                  <div class="">{{ getScore('home', matchup) }}</div>
+                </div>
               </div>
-            </div>
-          </div>
-          <div class="text-body-2" v-if="isComplete(matchup)">
-            <div class="d-flex justify-space-between">
-              <div class="">{{ getTeamName('away', matchup) }}</div>
-              <div class="">{{ getScore('away', matchup) }}</div>
-            </div>
-            <div class="d-flex justify-space-between">
-              <div class="">{{ getTeamName('home', matchup) }}</div>
-              <div class="">{{ getScore('home', matchup) }}</div>
-            </div>
-          </div>
-        </v-card-title>
-        <v-card-subtitle>
-          <div v-if="!isComplete(matchup)">
-            <div v-if="gameState(matchup) === 'pre'">
-              {{ handleDate(matchup) }}
-            </div>
-            <div v-else>
-              {{ matchup.status.type.shortDetail }}
-            </div>
-          </div>
-          <div v-if="isComplete(matchup)">
-            {{ matchup.status.type.description }}
-          </div>
-        </v-card-subtitle>
-        <v-card-text v-if="!isComplete(matchup)">
-          {{ currentOdds(matchup) }}
-        </v-card-text>
-        <v-card-actions v-if="showButton(matchup, user)">
-          <v-btn color="indigo-darken-3" @click="manageWeeklyGames(matchup)">
-            {{ getAddGameText(matchup) }}
-          </v-btn>
-        </v-card-actions>
-      </v-card>
+            </v-card-title>
+            <v-card-subtitle>
+              <div v-if="!isComplete(matchup)">
+                <div v-if="gameState(matchup) === 'pre'">
+                  {{ handleDate(matchup) }}
+                </div>
+                <div v-else>
+                  {{ matchup.status.type.shortDetail }}
+                </div>
+              </div>
+              <div v-if="isComplete(matchup)">
+                {{ matchup.status.type.description }}
+              </div>
+            </v-card-subtitle>
+            <v-card-text v-if="!isComplete(matchup)">
+              {{ currentOdds(matchup) }}
+            </v-card-text>
+            <v-card-actions v-if="showButton(matchup, user)">
+              <v-btn color="indigo-darken-3" @click="manageWeeklyGames(matchup)">
+                {{ getAddGameText(matchup) }}
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-list-item>
     </v-list-item>
   </span>
 </template>
@@ -145,9 +157,12 @@ export default {
   components: {
     EditOdds,
   },
-  created() {},
+  created() { },
   data() {
-    return {};
+    return {
+      search: null,
+      conf_name: null
+    };
   },
   props: ['week', 'matchups', 'saved_games', 'current_group', 'saved_games', 'user'],
   computed: {
@@ -156,14 +171,47 @@ export default {
     events() {
       return this.matchups.events
     },
+    filtered_events() {
+      return this.events.filter(e => this.handleSearchFilter(e)).filter(b => this.handleConfFilter(b))
+    },
     handleWeek() {
       if (typeof this.week === 'string' || this.week instanceof String) {
         return this.week
       }
       return this.week[0].value
     },
+    conf_array() {
+      return this.events.map(e => e.competitions[0].groups)
+    },
+    conferences() {
+      return [...new Set(this.conf_array.map(JSON.stringify))].filter(a => !!a).map(JSON.parse);
+    },
+    game_dates() {
+      return [...new Set(this.filtered_events.map(e => this.formatDate(e.date)))]
+    }
   },
   methods: {
+    formatDate(date) {
+      return moment(date).format('dddd, MMMM Do')
+    },
+    gamesOnDay(day) {
+      return this.filtered_events.filter(e => day === this.formatDate(e.date))
+    },
+    handleSearchFilter(game) {
+      if (!this.search) {
+        return true
+      }
+      return game.name.toLowerCase().includes(this.search.toLowerCase()) || game.shortName.toLowerCase().includes(this.search.toLowerCase())
+    },
+    handleConfFilter(game) {
+      if (!this.conf_name || this.conf_name.length < 1) {
+        return true
+      }
+      if (game.competitions[0] && game.competitions[0].competitors) {
+        return game.competitions[0].competitors.map(c => c.team.conferenceId).includes(this.conf_name)
+      }
+      return false
+    },
     showButton(_matchup, user) {
       if (this.admin_override) {
         return true
@@ -239,7 +287,7 @@ export default {
             this.$store.commit('pushWeeklyGames', game)
           }
           router.reload()
-  
+
         })
       }
     },
@@ -253,4 +301,8 @@ export default {
 };
 </script>
 
-<style></style>
+<style>
+.filter-expansion .v-expansion-panel-text__wrapper {
+  padding: 0px;
+}
+</style>

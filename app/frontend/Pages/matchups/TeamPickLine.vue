@@ -47,7 +47,7 @@
                 </div>
             </v-col>
         </v-row>
-        <v-divider class="" thickness="3px"></v-divider>
+        <slot></slot>
     </span>
 </template>
 <script>
