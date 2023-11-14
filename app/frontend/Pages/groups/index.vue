@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid full-height>
+  <v-container fluid class="h-75">
     <v-row class="justify-center align-center">
       <v-col>
         <div class="d-flex justify-center">
@@ -22,7 +22,7 @@
           @update:modelValue="navToWeek"></v-select>
       </v-col>
     </v-row>
-    <v-row>
+    <v-row v-if="saved_games.length > 0">
       <v-table density="compact">
         <thead>
           <tr>
@@ -187,6 +187,9 @@
           </tr>
         </tbody>
       </v-table>
+    </v-row>
+    <v-row v-else class="align-center justify-center fill-height">
+      <div class="text-h4 text-center">Games For This Week Not Selected</div>
     </v-row>
   </v-container>
 </template>
