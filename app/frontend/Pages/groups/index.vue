@@ -151,7 +151,7 @@
                 <div class="team-pick">
                   {{ getTeamPickFromRemote(remote_game, u.id) ? getTeamPickFromRemote(remote_game, u.id).team.abbreviation : 'No Pick' }}
                 </div>
-                <div class="confidence">
+                <div class="">
                   {{ getConfidenceFromRemote(remote_game, u.id) | '' }}
                 </div>
               </div>
