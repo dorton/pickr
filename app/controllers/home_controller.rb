@@ -1,24 +1,27 @@
 class HomeController < ApplicationController
   
     def index
-        @group = params[:group_slug] ? Group.find_by_slug(params[:group_slug]) : current_user.groups.first
-        @week_value = params[:week_id] ? params[:week_id].split('week_').last : current_week.first.value
+        @group = params[:group_slug] ? Group.includes(:games, :picks, :users).find_by_slug(params[:group_slug]) : current_user.groups.includes(:games, :picks, :users).first
+        @current_week = current_week.first
+        @week_value = params[:week_id] ? params[:week_id].split('week_').last : @current_week.value
         @week_calendar = Calendar.find_by_value(@week_value)
         @matchups = helpers.espnScores(@week_value)
         @user = current_user
         if @group && @user.groups.include?(@group)
             render inertia: "groups/index", props: {
               matchups: @matchups,
-              current_week: current_week.first.value,
+              current_week: @current_week.value,
               user: @user,
               users: @group.users,
               week: @week_value,
               week_calendar: @week_calendar,
               saved_picks: @group.picks.where(week: @week_value),
               saved_games: @group.games.where(week: @week_value),
+              all_picks: @group.picks,
+              all_games: @group.games,
               current_group: @group,
               user_groups: current_user.groups,
-              current_calendar: current_week.first,
+              current_calendar: @current_week,
               calendars: Calendar.all
             }
         end

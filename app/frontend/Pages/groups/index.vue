@@ -26,8 +26,10 @@
       <v-table density="compact">
         <thead>
           <tr>
-            <th v-if="saved_games.length > 0" class="text-left"></th>
-            <th v-if="saved_games.length > 0" class="text-left"></th>
+            <th colspan="2" v-if="saved_games.length > 0" class="text-left">
+              <!-- <v-btn @click="szn_view = !szn_view">{{ szn_text }}</v-btn> -->
+            </th>
+            <th v-if="szn_view && saved_games.length > 0 && !all_games_pre" class="text-left"></th>
             <th :class="['text-center', handleBgColor(remote_game)]" v-for="remote_game in sorted_headers" :key="remote_game.id">
               <div class="text-body-2" v-if="!isComplete(remote_game)">
                 <div v-if="gameState(remote_game) === 'pre'" class="d-flex flex-column">
@@ -70,13 +72,15 @@
                 </div>
               </div>
             </th>
-            <th v-if="szn_view" class="text-left d-sm-none"></th>
-            <th class="text-left d-sm-none" v-if="saved_games.length > 0"></th>
-            <th class="text-left d-sm-none" v-if="saved_games.length > 0"></th>
+            <th class="text-left d-sm-none" v-if="saved_games.length > 0 && szn_view"></th>
+            <th colspan="2" class="text-left d-sm-none" v-if="saved_games.length > 0">
+              <!-- <v-btn @click="szn_view = !szn_view">{{ szn_text }}</v-btn> -->
+            </th>
           </tr>
           <tr>
             <th class="text-left text-caption">
             </th>
+            <th v-if="szn_view && saved_games.length > 0 && !all_games_pre" class="text-center text-caption text-no-wrap">Szn</th>
             <th class="text-center text-caption text-no-wrap">
               <div class="d-flex" v-if="!all_games_pre">
                 <div>Pts</div>
@@ -95,9 +99,6 @@
                 </div>
               </div>
             </th>
-            <th v-if="szn_view">
-              <div>szn</div>
-            </th>
             <th class="text-center text-caption text-no-wrap d-sm-none" v-if="saved_games.length > 0">
               <div class="d-flex" v-if="!all_games_pre">
                 <div>Pts</div>
@@ -106,8 +107,10 @@
                 </div>
               </div>
             </th>
-            <th class="text-left text-caption d-sm-none" v-if="saved_games.length > 0">
+            <th class="text-center text-caption text-no-wrap d-sm-none" v-if="szn_view && saved_games.length > 0 && !all_games_pre">
+              <div>Szn</div>
             </th>
+            <th class="text-center text-caption text-no-wrap d-sm-none" v-if="saved_games.length > 0 && !all_games_pre"></th>
           </tr>
         </thead>
         <tbody class="pb-4">
@@ -127,7 +130,7 @@
                 </div>
               </div>
             </td>
-            <td v-if="szn_view">0</td>
+            <td v-if="szn_view && !all_games_pre">0</td>
             <td v-if="!all_games_pre" class="text-center text-no-wrap">
               <div class="d-flex">
                 <div>
@@ -164,6 +167,7 @@
                 </div>
               </div>
             </td>
+            <td v-if="szn_view && !all_games_pre" class="text-center text-no-wrap d-sm-none">0</td>
             <td class="d-sm-none" v-if="saved_games.length > 0">
               <div class="text-no-wrap d-flex justify-left align-center" v-if="u.email === user.email">
                 <Link :href="current_pick_url">{{ u.username }}</Link>
@@ -235,7 +239,8 @@ export default {
       return this.szn_view ? 'Week View' : 'Season View'
     },
     sorted_users() {
-      return this.users.sort((a,b) => this.getWeeklyPoints(b.id) - this.getWeeklyPoints(a.id))
+      let getPoints = this.szn_view ? 'getSeasonPoints' : 'getWeeklyPoints'
+      return this.users.sort((a,b) => this[getPoints](b.id) - this[getPoints](a.id))
     },
     mappedGames() {
       if (this.saved_games) {
@@ -320,6 +325,7 @@ export default {
     hasTenPicks(user_id) {
       return this.saved_picks.filter(s => s.user_id === user_id).length === 10
     },
+    getSeasonPoints(picks, user_id) {},
     getWeeklyPoints(user_id) {
       let all_picks = this.saved_picks.filter(p => p.user_id === user_id)
       let won_picks = all_picks.map(a => {

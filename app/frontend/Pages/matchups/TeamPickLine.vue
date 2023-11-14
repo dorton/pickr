@@ -4,7 +4,7 @@
             <v-col>
                 <div :class="['team', {'team-selected': isSelected('away')}]" @click="setSelection('away')">
                     <div class="team-rank mx-1 d-none d-sm-flex">{{ getTeamRank('away') }}</div>
-                    <div class="team-name mx-1">{{ getTeamName('away') }}</div>
+                    <div class="team-name mx-1">{{ getTeamName('away', lgScrn ? 'location' : 'abbreviation' ) }}</div>
                     <div class="team-record mx-1 d-none d-sm-flex">({{ getTeamRecord('away') }})</div>
                 </div>
             </v-col>
@@ -18,7 +18,7 @@
                 <div :class="['team', {'team-selected': isSelected('home')}]" @click="setSelection('home')">
                     <div class="mx-1">@</div>
                     <div class="team-rank mx-1 d-none d-sm-flex">{{ getTeamRank('home') }}</div>
-                    <div class="team-name mx-1">{{ getTeamName('home') }}</div>
+                    <div class="team-name mx-1">{{ getTeamName('home', lgScrn ? 'location' : 'abbreviation' ) }}</div>
                     <div class="team-record mx-1 d-none d-sm-flex">({{ getTeamRecord('home') }})</div>
                 </div>
             </v-col>
@@ -32,15 +32,17 @@
                     </v-select>
                 </div>
             </v-col>
-            <!-- <v-col class="d-none d-sm-flex"> -->
-            <v-col :cols="cols" class="">
+            <v-col :cols="cols" :class="[mobile ? 'pb-2' : '', 'order-first','order-sm-last',  {'font-weight-bold': mobile}]">
                 <div class="game-info d-flex justify-start" v-if="gameState === 'pre'">
+                    <div class="mx-1 d-flex d-sm-none">{{ getTeamRank('away') }} {{ getTeamName('away', 'location') }} @ {{ getTeamRank('home') }} {{ getTeamName('home', 'location') }}</div>
                     <div class="time mx-1"> {{ gameTime }} </div>
                     <div class="station mx-1"> {{ gameStation }} </div>
                 </div>
-                <div class="game-info d-flex justify-start" v-else>
+                <div :class="['game-info', 'd-flex', 'justify-start', {'font-weight-bold': mobile}]" v-else>
+                    <div class="mx-1 d-flex d-sm-none"> {{ getTeamName('away', 'location') }} </div>
                     <div class="away-score mx-1"> {{ getScore('away') }} </div>
                     <div class="mx-1">-</div>
+                    <div class="mx-1 d-flex d-sm-none"> {{ getTeamName('home', 'location') }} </div>
                     <div class="home-score mx-1"> {{ getScore('home') }} </div>
                 </div>
             </v-col>
@@ -88,9 +90,16 @@ export default {
     },
     computed: {
         ...mapGetters(['all_games_pre']),
-        cols () {
+        mobile () {
             const { xs } = this.$vuetify.display
-            return xs ? 12 : ''
+            return xs
+        },
+        lgScrn () {
+            const { lg } = this.$vuetify.display
+            return lg
+        },
+        cols () {
+            return this.mobile ? 12 : ''
         },
         handleDropColor() {
             if (this.gameState !== 'post') {
@@ -246,8 +255,8 @@ export default {
         getTeamRecord(homeAway) {
             return this.getTeam(homeAway).records.find(r => r.type === 'total').summary
         },
-        getTeamName(homeAway) {
-            return this.getTeam(homeAway).team.abbreviation
+        getTeamName(homeAway, name='abbreviation') {
+            return this.getTeam(homeAway).team[name]
         },
         getTeamRank(homeAway) {
             return this.getTeam(homeAway).curatedRank.current <= 25 ? `#${this.getTeam(homeAway).curatedRank.current}` : ''
