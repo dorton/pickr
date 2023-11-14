@@ -5,6 +5,72 @@ module MatchupsHelper
         games = HTTParty.get(url)
     end
 
+    def current_week(week_id=nil)
+        if week_id.nil?
+            Calendar.where('? BETWEEN startDate AND endDate', Time.now)
+        else
+            Calendar.find(week_id)
+        end   
+    end
+
+    def weeks_games(week_id)
+        Game.includes(:picks).where(week: week_id)
+    end
+
+    def handle_updating_games(week_id)
+        remote_games = espnScores(week_id)["events"]
+        saved_games = weeks_games(week_id)
+        saved_games.each do |game|
+            remote_game = remote_games.find{ |rg| rg['id'].to_i == game['remote_game_id'].to_i }
+            home = get_home_away_team(remote_game, 'home')
+            away = get_home_away_team(remote_game, 'away')
+            data = {
+                        home_score: home['score'],
+                        away_score: away['score'],
+                        home_team: home['team']['location'],
+                        away_team: away['team']['location'],
+                        home_team_id: home['id'],
+                        away_team_id: away['id'],
+                        completed: remote_game['competitions'].first['status']['type']['completed']
+                    }
+            game.update(data)
+        end
+    end
+
+    def get_home_away_team(remote_game, homeAway)
+        remote_game['competitions'].first['competitors'].find{|c| c['homeAway'] == homeAway}
+    end
+    
+
+    def handle_winning_picks(week_id)
+        remote_games = espnScores(week_id)["events"]
+        saved_games = weeks_games(week_id)
+        saved_games.each do |game|
+            game.picks.each do |pick|
+                line = pick.remote_team_id == game.favored_team_id ? game.odds.abs : game.odds
+                favored_score = pick.remote_team_id == game.home_team_id ? 'home_score' : 'away_score'
+                other_score = favored_score == 'away_score' ?  'home_score' : 'away_score'
+                if (game[favored_score].to_i - game[other_score].to_i) > line
+                    pick.update(winner: true) if game.completed
+                end
+            end
+        end
+    end
+
+    def correct_pick(remote_favored_team, remote_picked_team, remote_other_team, saved_game)
+        line = remote_favored_team['id'].to_i == remote_picked_team['id'].to_i ? saved_game.odds.abs : saved_game.odds
+        
+        remote_picked_team['score'].to_i - remote_other_team['score'].to_i > line
+    end
+    
+
+    def remote_game_from_id(remote_game, id)
+        remote_game['competitions'].first['competitors'].find{ |c| c['id'].to_i == id}
+    end
+    
+    
+    
+
     def handleScores
         matches = HTTParty.get('https://api.the-odds-api.com/v4/sports/americanfootball_ncaaf/scores?apiKey=cdcaf10005b3d83980a203803535b3d4&daysFrom=2')
         matches.each do |match|

@@ -281,7 +281,22 @@ export default {
     },
     addGame(game) {
       if (this.weekly_games.length < 10) {
-        let data = { game: { week: this.handleWeek, remote_game_id: game.id, set_odds: null }, group: this.current_group }
+        let home = game.competitions[0].competitors.find(c => c.homeAway === 'home')
+        let away = game.competitions[0].competitors.find(c => c.homeAway === 'away')
+        let completed = game.status.type.completed
+        let data = { game: {
+                              week: this.handleWeek, 
+                              remote_game_id: game.id, 
+                              set_odds: null,
+                              completed: completed,
+                              home_team: home.team.location,
+                              away_team: away.team.location,
+                              home_team_id: home.id,
+                              away_team_id: away.id,
+                              home_score: home.score,
+                              away_score: away.score
+                          }, 
+                    group: this.current_group }
         axios.post('/games', data, this.config).then(r => {
           if (!this.gameInWeek(game) && this.weekly_games.length < 10) {
             this.$store.commit('pushWeeklyGames', game)

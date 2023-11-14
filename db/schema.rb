@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2023_11_14_133439) do
+ActiveRecord::Schema[7.1].define(version: 2023_11_14_172452) do
   create_table "calendars", force: :cascade do |t|
     t.string "label"
     t.string "alternateLabel"
@@ -30,6 +30,13 @@ ActiveRecord::Schema[7.1].define(version: 2023_11_14_133439) do
     t.datetime "updated_at", null: false
     t.integer "favored_team_id"
     t.float "odds"
+    t.string "home_team"
+    t.string "away_team"
+    t.integer "home_score"
+    t.integer "away_score"
+    t.integer "home_team_id"
+    t.integer "away_team_id"
+    t.boolean "completed", default: false
   end
 
   create_table "group_games", force: :cascade do |t|

@@ -27,7 +27,7 @@
         <thead>
           <tr>
             <th colspan="2" v-if="saved_games.length > 0" class="text-left">
-              <!-- <v-btn @click="szn_view = !szn_view">{{ szn_text }}</v-btn> -->
+              <v-btn @click="szn_view = !szn_view">{{ szn_text }}</v-btn>
             </th>
             <th v-if="szn_view && saved_games.length > 0 && !all_games_pre" class="text-left"></th>
             <th :class="['text-center', handleBgColor(remote_game)]" v-for="remote_game in sorted_headers" :key="remote_game.id">
@@ -74,7 +74,7 @@
             </th>
             <th class="text-left d-sm-none" v-if="saved_games.length > 0 && szn_view"></th>
             <th colspan="2" class="text-left d-sm-none" v-if="saved_games.length > 0">
-              <!-- <v-btn @click="szn_view = !szn_view">{{ szn_text }}</v-btn> -->
+              <v-btn @click="szn_view = !szn_view">{{ szn_text }}</v-btn>
             </th>
           </tr>
           <tr>
@@ -130,7 +130,7 @@
                 </div>
               </div>
             </td>
-            <td v-if="szn_view && !all_games_pre">0</td>
+            <td v-if="szn_view && !all_games_pre">{{ getSeasonPoints(u.id) }}</td>
             <td v-if="!all_games_pre" class="text-center text-no-wrap">
               <div class="d-flex">
                 <div>
@@ -234,7 +234,7 @@ export default {
       szn_view: false,
     };
   },
-  props: ['matchups', 'current_week', 'user', 'week', 'saved_picks', 'saved_games', 'current_group', 'users', 'user_groups', 'current_calendar', 'calendars'],
+  props: ['matchups', 'current_week', 'user', 'week', 'saved_picks', 'saved_games', 'current_group', 'users', 'user_groups', 'current_calendar', 'calendars', 'all_picks', 'all_games'],
   computed: {
     ...mapState(['weekly_picks', 'weekly_games', 'admin_override']),
     ...mapGetters(['all_games_pre', 'all_games_complete']),
@@ -265,6 +265,14 @@ export default {
     },
     sorted_headers () {
       return this.headers.sort((a,b) => this.findIndex(a.id) - this.findIndex(b.id))
+    },
+    all_pick_winners () {
+      return this.all_picks.filter(p => p.winner).map(w => {
+        let user = this.users.find(u => u.id === w.user_id)
+        let game = this.all_games.find(g => g.id === w.game_id)
+        let winner = game.home_team_id === w.remote_team_id ? game.home_team : game.away_team
+        return {user: user.username, game: game, pick: w, winner: winner}
+      })
     }
   },
   methods: {
@@ -331,7 +339,13 @@ export default {
     hasTenPicks(user_id) {
       return this.saved_picks.filter(s => s.user_id === user_id).length === 10
     },
-    getSeasonPoints(picks, user_id) {},
+    getSeasonPoints(user_id) {
+      let winner_picks = this.all_picks.filter(p => p.user_id === user_id && p.winner).map(w => w.confidence)
+      if (winner_picks.length > 0) {
+        return winner_picks.reduce((a,b) => a + b)
+      }
+      return 0
+    },
     getWeeklyPoints(user_id) {
       let all_picks = this.saved_picks.filter(p => p.user_id === user_id)
       let won_picks = all_picks.map(a => {
