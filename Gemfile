@@ -12,6 +12,8 @@ gem 'vite_rails'
 
 gem 'sidekiq'
 
+gem 'whenever', require: false
+
 gem "inertia_rails", "~> 3.0"
 # Brings Rails named routes to modern javascript (https://github.com/elmassimo/js_from_routes)
 gem "js_from_routes", "~> 2.0.4", group: :development
