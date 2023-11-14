@@ -188,12 +188,19 @@ GEM
     rake (13.1.0)
     rdoc (6.6.0)
       psych (>= 4.0.0)
+    redis-client (0.18.0)
+      connection_pool
     reline (0.4.0)
       io-console (~> 0.5)
     responders (3.1.1)
       actionpack (>= 5.2)
       railties (>= 5.2)
     ruby2_keywords (0.0.5)
+    sidekiq (7.2.0)
+      concurrent-ruby (< 2)
+      connection_pool (>= 2.3.0)
+      rack (>= 2.2.4)
+      redis-client (>= 0.14.0)
     sprockets (4.2.1)
       concurrent-ruby (~> 1.0)
       rack (>= 2.2.4, < 4)
@@ -236,6 +243,7 @@ DEPENDENCIES
   js_from_routes (~> 2.0.4)
   puma (>= 5.0)
   rails (~> 7.1.1)
+  sidekiq
   sprockets-rails
   sqlite3 (~> 1.4)
   tzinfo-data
