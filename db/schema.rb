@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2023_11_11_233558) do
+ActiveRecord::Schema[7.1].define(version: 2023_11_14_133439) do
   create_table "calendars", force: :cascade do |t|
     t.string "label"
     t.string "alternateLabel"
@@ -97,6 +97,7 @@ ActiveRecord::Schema[7.1].define(version: 2023_11_11_233558) do
     t.datetime "updated_at", null: false
     t.integer "user_id"
     t.integer "game_id"
+    t.boolean "winner", default: false
   end
 
   create_table "user_groups", force: :cascade do |t|
