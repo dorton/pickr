@@ -2,7 +2,7 @@
   <v-layout class="h-screen">
     <v-app-bar :elevation="2">
       <v-app-bar-title>
-        <Link href="/" class="main-header">Sports Ball Pickr</Link>
+        <Link href="/" class="main-header">{{ titleBarTitle }}</Link>
       </v-app-bar-title>
       <v-spacer></v-spacer>
       <v-menu v-if="user_groups.length > 1">
@@ -66,6 +66,13 @@ export default {
   props: ['matchups', 'user', 'saved_games', 'saved_picks', 'current_group', 'week', 'user_groups', 'current_calendar', 'week_calendar'],
   computed: {
     ...mapState(['weekly_picks', 'weekly_games', 'admin_override', 'config']),
+    mobile () {
+        const { xs } = this.$vuetify.display
+        return xs
+    },
+    titleBarTitle() {
+      return this.mobile ? 'SBP' : 'Sports Ball Pickr'
+    },
   },
   methods: {
     changeGroups(group) {

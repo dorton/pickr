@@ -3,23 +3,23 @@
         <v-row no-gutters class="justify-space-around align-center my-2" v-if="saved_game">
             <v-col>
                 <div :class="['team', {'team-selected': isSelected('away')}]" @click="setSelection('away')">
-                    <div class="team-rank mx-1 d-none d-sm-flex">{{ getTeamRank('away') }}</div>
-                    <div class="team-name mx-1">{{ getTeamName('away', lgScrn ? 'location' : 'abbreviation' ) }}</div>
-                    <div class="team-record mx-1 d-none d-sm-flex">({{ getTeamRecord('away') }})</div>
+                    <div class="team-rank mr-1 d-none d-sm-flex">{{ getTeamRank('away') }}</div>
+                    <div class="team-name">{{ getTeamName('away', lgScrn ? 'location' : 'abbreviation' ) }}</div>
+                    <div class="team-record ml-1 d-none d-sm-flex">({{ getTeamRecord('away') }})</div>
                 </div>
             </v-col>
             <v-col>
-                <div class="odds-wrapper d-sm-flex flex-column flex-sm-row justify-sm-space-around">
+                <div class="odds-wrapper flex-column d-sm-flex flex-sm-row justify-sm-space-evenly">
                     <div class="favored">{{ favored_team ? favored_team.team.abbreviation : '' }}</div>
                     <div class="odds">{{ saved_odds }}</div>
                 </div>
             </v-col>
             <v-col>
                 <div :class="['team', {'team-selected': isSelected('home')}]" @click="setSelection('home')">
-                    <div class="mx-1">@</div>
-                    <div class="team-rank mx-1 d-none d-sm-flex">{{ getTeamRank('home') }}</div>
-                    <div class="team-name mx-1">{{ getTeamName('home', lgScrn ? 'location' : 'abbreviation' ) }}</div>
-                    <div class="team-record mx-1 d-none d-sm-flex">({{ getTeamRecord('home') }})</div>
+                    <div class="">@</div>
+                    <div class="team-rank mr-1 d-none d-sm-flex">{{ getTeamRank('home') }}</div>
+                    <div class="team-name">{{ getTeamName('home', lgScrn ? 'location' : 'abbreviation' ) }}</div>
+                    <div class="team-record ml-1 d-none d-sm-flex">({{ getTeamRecord('home') }})</div>
                 </div>
             </v-col>
             <v-col class="confidence-wrapper d-flex justify-center">
@@ -265,6 +265,14 @@ export default {
 }
 </script>
 <style>
+.confidence .v-select__menu-icon {
+    margin-inline-start: 0px !important;
+  }
+
+.confidence .v-select .v-field--dirty .v-select__selection {
+    margin-inline-end: 0px !important;
+  }
+
 .game-wrapper {
     display: flex;
     align-items: center;
@@ -299,7 +307,8 @@ export default {
 }
 
 .confidence {
-    max-width: 85px;
+    min-width: 77px;
+    margin-left: 4px;
 }
 
 .game-info {
