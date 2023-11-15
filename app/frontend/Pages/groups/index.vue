@@ -167,7 +167,7 @@
                 </div>
               </div>
             </td>
-            <td v-if="szn_view && !all_games_pre" class="text-center text-no-wrap d-sm-none">0</td>
+            <td v-if="szn_view && !all_games_pre" class="text-center text-no-wrap d-sm-none">{{ getSeasonPoints(u.id) }}</td>
             <td class="d-sm-none" v-if="saved_games.length > 0">
               <div class="text-no-wrap d-flex justify-left align-center" v-if="u.email === user.email">
                 <Link :href="current_pick_url">{{ u.username }}</Link>

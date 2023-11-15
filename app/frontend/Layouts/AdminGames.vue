@@ -5,6 +5,9 @@
         {{ admin_override ? 'Lock' : 'Unlock' }}
       </v-btn>
     </v-list-item>
+    <v-list-item v-if="user.is_admin">
+      <v-btn block @click="toggleTheme">toggle theme</v-btn>
+    </v-list-item>
     <v-divider v-if="user.is_admin"></v-divider>
     <v-list-item v-if="weekly_games.length > 0 && user.is_admin" title="Current Games"></v-list-item>
     <v-list-item v-for="game in weekly_games" :key="game.remote_game_id" v-if="user.is_admin">
@@ -64,7 +67,7 @@
         </v-card-text>
         <v-card-text v-else>
           <div>
-            Saved Odds {{ getSavedOdds(game) }}
+            {{ getSavedOdds(game) }}
           </div>
         </v-card-text>
         <v-card-actions v-if="showButton(game, user)">
@@ -133,7 +136,12 @@
               </div>
             </v-card-subtitle>
             <v-card-text v-if="!isComplete(matchup)">
-              {{ currentOdds(matchup) }}
+              <div>
+                {{ currentOdds(matchup) }}
+              </div>
+              <div>
+                {{ getSavedOdds(matchup) }}
+              </div>
             </v-card-text>
             <v-card-actions v-if="showButton(matchup, user)">
               <v-btn color="indigo-darken-3" @click="manageWeeklyGames(matchup)">
@@ -145,6 +153,15 @@
     </v-list-item>
   </span>
 </template>
+<script setup>
+import { useTheme } from 'vuetify'
+
+const theme = useTheme()
+
+function toggleTheme () {
+  theme.global.name.value = theme.global.current.value.dark ? 'light' : 'dark'
+}
+</script>
 
 <script>
 import EditOdds from './EditOdds.vue'
@@ -152,6 +169,7 @@ import { mapState, mapGetters } from 'vuex'
 import moment from 'moment'
 import axios from 'axios'
 import { router } from '@inertiajs/vue3'
+import { useTheme } from 'vuetify'
 export default {
   name: "AdminGames",
   components: {
@@ -219,7 +237,11 @@ export default {
       return user.is_admin && this.all_games_pre && !this.week_in_past
     },
     getSavedOdds(remote_game) {
-      return this.getSavedGameFromRemoteGame(remote_game).odds
+      let saved_game = this.getSavedGameFromRemoteGame(remote_game)
+      if (saved_game) {
+        return `Saved Odds: ${saved_game.odds}`
+      }
+      return ''
     },
     getSavedGameFromRemoteGame(remote_game) {
       return this.saved_games.find(s => s.remote_game_id.toString() === remote_game.id)
@@ -246,14 +268,27 @@ export default {
       return this.getTeam(homeAway, matchup).curatedRank.current <= 25 ? `(${this.getTeam(homeAway, matchup).curatedRank.current})` : ''
     },
     handleDate(matchup) {
-      return ` ${moment(matchup.date).format("MMM Do h:mm")} ${moment(matchup.date).fromNow()}`
+      return ` ${moment(matchup.date).format("h:mm")} ${this.getBroadcast(matchup)}`
+    },
+    getBroadcast(game) {
+      let comp = game.competitions
+      if (comp && comp.length > 0) {
+        let broadcasts = comp[0].broadcasts
+        if (broadcasts && broadcasts.length > 0) {
+          let names = broadcasts[0].names
+          if (names && names.length > 0) {
+            return names[0]
+          }
+        }
+      }
+      return ''
     },
     currentOdds(matchup) {
       let comps = matchup.competitions
       if (comps && comps.length > 0) {
         let odds = comps[0].odds
         if (odds && odds.length > 0) {
-          return odds[0].details || ''
+          return odds.map(o => o.details ? `${o.details} (${o.provider.name})` : '').join(' ')
         }
       }
       return ''

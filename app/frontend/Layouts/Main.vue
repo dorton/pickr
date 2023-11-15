@@ -2,7 +2,7 @@
   <v-layout class="h-screen">
     <v-app-bar :elevation="2">
       <v-app-bar-title>
-        <Link href="/" class="main-header">{{ titleBarTitle }}</Link>
+        <Link href="/" class="main-header" as="text">{{ titleBarTitle }}</Link>
       </v-app-bar-title>
       <v-spacer></v-spacer>
       <v-menu v-if="user_groups.length > 1">
@@ -19,8 +19,8 @@
           </v-list-item>
         </v-list>
       </v-menu>
-      <v-btn icon>
-        <v-icon @click="drawer = !drawer">mdi-cog</v-icon>
+      <v-btn icon @click="drawer = !drawer">
+        <v-icon>mdi-cog</v-icon>
       </v-btn>
     </v-app-bar>
     <v-navigation-drawer location="right" v-model="drawer" temporary>
@@ -106,8 +106,7 @@ export default {
 </script>
 
 <style>
-a.main-header {
-  color: black;
-  text-decoration: none;
+.v-app-bar-title .main-header {
+  cursor: pointer;
 }
 </style>

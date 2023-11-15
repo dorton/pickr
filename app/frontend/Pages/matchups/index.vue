@@ -24,7 +24,7 @@
           </div>
         </v-card-title>
         <div v-for="(day, gd_index) in game_dates" :key="gd_index">
-          <div :class="['text-subtitle-1', mobile ? '' : 'text-right', 'bg-grey-darken-2', 'px-3', 'py-1', 'font-weight-bold']">{{ day }}</div>
+          <div :class="['date-wrapper text-subtitle-1', mobile ? '' : 'text-right', 'bg-grey-darken-2', 'px-3', 'py-1', 'font-weight-bold']">{{ day }}</div>
           <v-card color="grey-lighten-4" class="mb-2" elevation="5">
             <v-card-text class="team-pick-card">
               <TeamPickLine v-for="(game, i) in gamesOnDay(day)" :key="game.id" :remote_game="game" :picks="weekly_picks"
@@ -339,6 +339,10 @@ export default {
 }
 </script>
 <style>
+.date-wrapper {
+  border-radius: 4px;
+}
+
 .v-card-text.team-pick-card {
   padding: 0rem 1rem 0rem 1rem;
 }

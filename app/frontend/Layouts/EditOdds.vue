@@ -11,7 +11,7 @@
         <div class="set-odds">
             <v-text-field v-model="odds" density="compact" type="number"></v-text-field>
         </div>
-        <v-btn color="success" @click="submit()" v-if="canSubmit">Submit</v-btn>
+        <v-btn :color="button_text === 'Submit' ? 'success' : ''" @click="submit()" v-if="canSubmit">{{ button_text }}</v-btn>
     </div>
 </template>
 <script>
@@ -23,7 +23,8 @@ export default {
     data() {
         return {
             odds: null,
-            favored_team_id: null
+            favored_team_id: null,
+            button_text: 'Submit'
         }
     },
     mounted () {
@@ -52,6 +53,7 @@ export default {
             if (this.odds !== null && this.favored_team_id !== null) {
                 axios.patch(`/games/${this.saved_game.id}`, {game: {odds: this.odds, favored_team_id: this.favored_team_id}}, this.config).then(r => {
                     router.reload()
+                    this.button_text = 'Saved'
                 })
             }
         }
