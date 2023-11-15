@@ -7,7 +7,7 @@ module MatchupsHelper
 
     def current_week(week_id=nil)
         if week_id.nil?
-            Calendar.where('? BETWEEN startDate AND endDate', Time.now)
+            Calendar.where('? BETWEEN startDate AND endDate', Time.now).first
         else
             Calendar.find(week_id)
         end   
