@@ -9,7 +9,7 @@ module MatchupsHelper
         if week_id.nil?
             Calendar.where('? BETWEEN startDate AND endDate', Time.now).first
         else
-            Calendar.find(week_id)
+            Calendar.find_by_value(week_id)
         end   
     end
 
