@@ -111,10 +111,10 @@ export default {
       return this.weekly_games.sort((a, b) => this.findIndex(a.id) - this.findIndex(b.id))
     },
     group_url() {
-      return `/${this.current_group.slug}/week_${this.selected_calendar}`
+      return `/${this.current_group.slug}/${this.selected_calendar}`
     },
     pick_url() {
-      return `/${this.current_group.slug}/week_${this.selected_calendar}/picks`
+      return `/${this.current_group.slug}/${this.selected_calendar}/picks`
     },
     getCalendarDetail() {
       if (this.calendars && !!this.selected_calendar) {
@@ -181,8 +181,8 @@ export default {
     },
     navWeeks(direction) {
       let diff = direction === 'back' ? -1 : 1
-      let week = parseInt(this.handleWeek) + diff
-      return `/${this.current_group.slug}/week_${week}/picks`
+      let week = parseInt(this.handleWeek.split('_')[0]) + diff
+      return `/${this.current_group.slug}/${week}/picks`
     },
     currentOdds(matchup) {
       let comps = matchup.competitions

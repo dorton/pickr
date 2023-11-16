@@ -52,7 +52,7 @@
                   {{ game.status.type.shortDetail }}
                 </div>
                 <div>
-                  {{ game.competitions[0].broadcasts[0].names[0] }}
+                  {{ handleBroadcast(game) }}
                 </div>
               </div>
             </div>
@@ -209,6 +209,10 @@ export default {
     }
   },
   methods: {
+    handleBroadcast(game) {
+      let comps = game.competitions[0]
+      return comps.broadcasts && comps.broadcasts[0] && comps.broadcasts[0].names ? comps.broadcasts[0].names[0] : ''
+    },
     formatDate(date) {
       return moment(date).format('dddd, MMMM Do')
     },
@@ -265,7 +269,7 @@ export default {
       return this.getTeam(homeAway, matchup).score
     },
     getTeamRank(homeAway, matchup) {
-      return this.getTeam(homeAway, matchup).curatedRank.current <= 25 ? `(${this.getTeam(homeAway, matchup).curatedRank.current})` : ''
+      return (this.getTeam(homeAway, matchup) && this.getTeam(homeAway, matchup).curatedRank && this.getTeam(homeAway, matchup).curatedRank.current <= 25) ? `(${this.getTeam(homeAway, matchup).curatedRank.current})` : ''
     },
     handleDate(matchup) {
       return ` ${moment(matchup.date).format("h:mm")} ${this.getBroadcast(matchup)}`

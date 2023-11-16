@@ -49,7 +49,7 @@
                     </div>
                   </div>
                   <div class="description-wrapper text-no-wrap">
-                    <div> {{ remote_game.competitions[0].broadcasts[0].names[0] }}</div>
+                    <div> {{ handleBroadcast(remote_game) }}</div>
                     <div>{{ remote_game.status.type.shortDetail }}</div>
                   </div>
                 </div>
@@ -258,7 +258,7 @@ export default {
       return ''
     },
     current_pick_url() {
-      return `/${this.current_group.slug}/week_${this.week}/picks`
+      return `/${this.current_group.slug}/${this.week}/picks`
     },
     headers() {
       return this.saved_games.map(g => this.matchups.events.find(e => e.id === g.remote_game_id.toString()))
@@ -276,6 +276,10 @@ export default {
     }
   },
   methods: {
+    handleBroadcast(game) {
+      let comps = game.competitions[0]
+      return comps.broadcasts && comps.broadcasts[0] && comps.broadcasts[0].names ? comps.broadcasts[0].names[0] : ''
+    },
     findIndex (id) {
       return this.matchups.events.findIndex(e=>e.id === id)
     },
@@ -304,7 +308,7 @@ export default {
       return ''
     },
     admin_edit_url(id) {
-      return `/${this.current_group.slug}/week_${this.week}/picks/${id}`
+      return `/${this.current_group.slug}/${this.week}/picks/${id}`
     },
     handleBgColor(remote_game) {
       if (this.gameState(remote_game) === 'in') {
@@ -413,7 +417,7 @@ export default {
       return this.getTeam(remote_game, homeAway).score
     },
     navToWeek() {
-      let url = `/${this.current_group.slug}/week_${this.selected_calendar}`
+      let url = `/${this.current_group.slug}/${this.selected_calendar}`
       router.get(url)
     },
     getSavedFromRemote(remote_game) {

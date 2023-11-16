@@ -259,7 +259,10 @@ export default {
             return this.getTeam(homeAway).team[name]
         },
         getTeamRank(homeAway) {
-            return this.getTeam(homeAway).curatedRank.current <= 25 ? `#${this.getTeam(homeAway).curatedRank.current}` : ''
+            if (this.getTeam(homeAway).curatedRank) {
+                return this.getTeam(homeAway).curatedRank.current <= 25 ? `#${this.getTeam(homeAway).curatedRank.current}` : ''
+            }
+            return ''
         },
     },
 }

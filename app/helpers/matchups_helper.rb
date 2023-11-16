@@ -1,7 +1,10 @@
 module MatchupsHelper
 
-    def espnScores(week)
-        url = "https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard?week=#{week}&groups=80"
+    def espnScores(week_slug, sport=nil, league='college-football')
+        sport = 'football' if league == 'college-football' || league ==  'nfl'
+        q = league == 'college-football' ? 'groups=80' : ''
+        url = "https://site.api.espn.com/apis/site/v2/sports/#{sport}/#{league}/scoreboard?week=#{week_slug.split('_').last}&#{q}"
+        logger.info(url)
         games = HTTParty.get(url)
     end
 

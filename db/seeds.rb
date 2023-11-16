@@ -8,15 +8,18 @@
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
 
-url = "https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard?week=11&groups=80"
-games = HTTParty.get(url)
-reg_season = games["leagues"].first["calendar"].find{|l| l["label"] == "Regular Season"}["entries"]
-post_season = games["leagues"].first["calendar"].find{|l| l["label"] == "Postseason"}["entries"]
-reg_season.each do |s|
-    Calendar.create(label: s["label"], alternateLabel: s["alternateLabel"], detail: s["detail"], value: s["value"], startDate: s["startDate"], endDate: s["endDa
-    te"])
-end
-post_season.each do |s|
-    Calendar.create(label: s["label"], alternateLabel: s["alternateLabel"], detail: s["detail"], value: s["value"], startDate: s["startDate"], endDate: s["endDa
-    te"])
+['nfl', 'college-football'].each do |l|
+    url = "https://site.api.espn.com/apis/site/v2/sports/football/#{l}/scoreboard"
+    games = HTTParty.get(url)
+    reg_season = games["leagues"].first["calendar"].find{|l| l["label"] == "Regular Season"}["entries"]
+    post_season = games["leagues"].first["calendar"].find{|l| l["label"] == "Postseason"}["entries"]
+    [reg_season, post_season].each_with_index do |season, i|
+        regular_season_bool = i == 0
+        post_season_bool = i == 1
+        season.each do |s|
+            svalue = s["value"]
+            v = regular_season_bool ? "week_#{svalue}" : "post_#{svalue}"
+            Calendar.create(label: s["label"], alternateLabel: s["alternateLabel"], detail: s["detail"], value: v, startDate: s["startDate"], endDate: s["endDate"], league: l, sport: 'football', regular_season: regular_season_bool, post_season: post_season_bool)
+        end
+    end
 end
