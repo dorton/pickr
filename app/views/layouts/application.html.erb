@@ -2,14 +2,17 @@
 <html>
   <head>
     <title>Pickr</title>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
+      <%= vite_client_tag %>
+    <%- if controller_name != 'sessions' %>
+      <%= vite_javascript_tag 'application' %>
+    <% end %>
     <% if content_for? :for_head %>
       <%= yield :for_head %>
     <% end %>
-    <%= vite_client_tag %>
-    <%= vite_javascript_tag 'application' %>
     <!--
       If using a TypeScript entrypoint file:
         vite_typescript_tag 'application'
@@ -24,9 +27,7 @@
 
   <body>
 <div class="container">
-	<div class="screen">
     <%= yield %>
-	</div>
 </div>  
 </body>
 </html>

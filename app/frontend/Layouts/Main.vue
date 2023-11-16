@@ -34,7 +34,7 @@
           Logout
         </v-btn>
       </v-list-item>
-      <AdminGames v-if="drawer" :user="user" :week="week" :current_group="current_group" :current_calendar="current_calendar" :matchups="matchups" :saved_games="saved_games" />
+      <AdminGames v-if="drawer && saved_games" :user="user" :week="week" :current_group="current_group" :current_calendar="current_calendar" :matchups="matchups" :saved_games="saved_games" />
     </v-navigation-drawer>
     <v-main>
       <slot></slot>

@@ -25,16 +25,11 @@ class HomeController < ApplicationController
               current_calendar: @current_week,
               calendars: Calendar.all
             }
-        end
-        if !@group ||(@group && current_user.groups.empty?)
-                render inertia: "users/index", props: {
-                    user: @user,
-                    user_groups: @user.groups,
-                    week: @week,
-                    groups: Group.all.where(is_private: false),
-                    calendars: Calendar.all,
-                    matchups: @matchups,
-                  } 
+        
+        elsif !@group ||(@group && current_user.groups.empty?)
+                redirect_to manage_groups_path
+        else 
+            redirect_to manage_groups_path
         end
         
     end
@@ -45,20 +40,18 @@ class HomeController < ApplicationController
         @week_calendar = Calendar.find_by_value(@week_value)
         @matchups = helpers.espnScores(@week)
         @user = current_user
-        if @group
-            render inertia: "users/index", props: {
-                user: User.includes(:groups).find(@user.id).as_json({groups: :groups}),
-                user_groups: @user.groups,
-                week: @week_value,
-                groups: Group.all.where(is_private: false),
-                calendars: Calendar.all,
-                matchups: @matchups,
-                current_calendar: current_week.first,
-                week_calendar: @week_calendar,
-              } 
-        else
-            redirect_to root_url
-        end
+        @saved_games = @group ? @group.games.where(week: @week_value) : []
+        render inertia: "users/index", props: {
+            user: User.includes(:groups).find(@user.id).as_json({groups: :groups}),
+            user_groups: @user.groups,
+            week: @week_value,
+            groups: Group.all.where(is_private: false),
+            calendars: Calendar.all,
+            matchups: @matchups,
+            current_calendar: current_week.first,
+            week_calendar: @week_calendar,
+            saved_games: @saved_games,
+        } 
     end
     
 
@@ -126,7 +119,7 @@ class HomeController < ApplicationController
                 calendars: Calendar.all
             }    
         else
-            redirect_to root_url
+            redirect_to manage_groups_path
         end
     end
 

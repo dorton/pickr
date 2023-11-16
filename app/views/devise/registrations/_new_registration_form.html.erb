@@ -1,0 +1,29 @@
+<div class="screen__content">
+<%= form_for(resource, html: {class: "registration"}, as: resource_name, url: registration_path(resource_name)) do |f| %>
+        <%= render "devise/shared/error_messages", resource: resource %>
+        <div class="login__field">
+          <i class="login__icon fas fa-user"></i>
+          <%= f.text_field :username, autofocus: true, placeholder: "Username", class: 'login__input' %>
+				</div>
+        <div class="login__field">
+          <i class="login__icon fas fa-user"></i>
+          <%= f.email_field :email, autofocus: true, autocomplete: "email", class: 'login__input', placeholder: "Email" %>
+				</div>
+        <div class="login__field">
+          <i class="login__icon fas fa-lock"></i>
+          <%= f.password_field :password, autocomplete: "current-password", class: 'login__input', placeholder: "Password" %>
+          <div>
+          <% if @minimum_password_length %>
+            <em>(<%= @minimum_password_length %> characters minimum)</em>
+          <% end %>
+          </div>
+				</div>
+        <div class="login__field">
+          <i class="login__icon fas fa-lock"></i>
+          <%= f.password_field :password_confirmation, autocomplete: "new-password", class: 'login__input', placeholder: "Confirm Password" %>
+				</div>
+        <div class="actions mt-4">
+          <%= f.submit "Sign up", class:'button login__submit'%>
+        </div>
+      <% end %>
+</div>

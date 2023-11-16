@@ -1,5 +1,5 @@
 <template>
-  <v-card flat>
+  <v-card flat class="h-100" color="transparent">
     <v-tabs v-model="tab" color="deep-purple-accent-4" align-tabs="center">
       <v-tab :value="1">Groups</v-tab>
     </v-tabs>
@@ -66,6 +66,7 @@ export default {
   created() {
     this.$store.commit('setMatchups', this.matchups)
     this.local_username = this.user.username
+    this.handleAnyParams()
   },
   data() {
     return {
@@ -77,7 +78,7 @@ export default {
       local_username: null
     };
   },
-  props: ['user', 'week', 'groups', 'calendars', 'user_groups'],
+  props: ['user', 'week', 'groups', 'calendars', 'user_groups', 'matchups'],
   computed: {
     ...mapState(['config']),
     widthClass() {
@@ -87,6 +88,13 @@ export default {
     },
   },
   methods: {
+    handleAnyParams() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const pg = urlParams.get('pg');
+      if (pg) {
+        this.private_slug_id = pg
+      }
+    },
     getGroupUrl(group) {
       router.get(`/${group.slug}`)
     },
