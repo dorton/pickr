@@ -270,7 +270,7 @@ export default {
       return this.getTeam(homeAway, matchup).team.abbreviation
     },
     getTeamRank(homeAway, matchup) {
-      return this.getTeam(homeAway, matchup).curatedRank.current <= 25 ? `(${this.getTeam(homeAway, matchup).curatedRank.current})` : ''
+      return this.getTeam(homeAway, matchup) && this.getTeam(homeAway, matchup).curatedRank && this.getTeam(homeAway, matchup).curatedRank.current <= 25 ? `(${this.getTeam(homeAway, matchup).curatedRank.current})` : ''
     },
     findMostFrequent(arr) {
       return arr
