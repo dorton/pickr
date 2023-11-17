@@ -17,7 +17,7 @@ class GamesController < ApplicationController
   def create
     @group = Group.find(params[:group][:id])
     @game = Game.new(game_params)
-
+    @game.calendar_id = Calendar.where(league: @group.league).where(value: params[:game][:week]).first.id
     if @game.save
       @group.games << @game
       render json: @game, status: :created, location: @game

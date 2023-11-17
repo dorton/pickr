@@ -15,6 +15,7 @@ class HomeController < ApplicationController
         @user = current_user
         @saved_picks = @group.picks.where(week: @week_value)
         @saved_games = @group.games.where(week: @week_value)
+        @all_games = get_all_games(@group, @week_calendar)
         if @group && @user.groups.include?(@group)
             game_check_or_update(@matchups, @saved_games, @week_value, @group_league, @group_sport)
             render inertia: "groups/index", props: {
@@ -26,8 +27,8 @@ class HomeController < ApplicationController
               week_calendar: @week_calendar,
               saved_picks: @saved_picks,
               saved_games: @saved_games,
-              all_picks: @group.picks.where('week <= ?', @week_value),
-              all_games: @group.games.where('week <= ?', @week_value),
+              all_games: @all_games,
+              all_picks: @group.picks.where(game_id: @all_games.pluck(:id)),
               current_group: @group,
               user_groups: current_user.groups,
               current_calendar: @current_week,
@@ -174,6 +175,14 @@ class HomeController < ApplicationController
     end
 
     private
+    def get_all_games(group, calendar)
+        group.games.where(calendar_id: get_cal_for_group(group, calendar).pluck(:id))
+    end
+    
+    def get_cal_for_group(group, calendar)
+        Calendar.where(league: group.league).where('startDate <= ?', calendar.startDate)
+    end
+    
     def game_check_or_update(matchups, saved_games, week_slug, league, sport='football')
         mapped_save_games = saved_games.map {|sg| sg.remote_game_id.to_s }
         all_non_pre_events = matchups['events'].select {|e| e['status']['type']['state'] != 'pre' }
