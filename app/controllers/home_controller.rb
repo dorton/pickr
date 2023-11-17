@@ -13,8 +13,10 @@ class HomeController < ApplicationController
         @group_sport = @group ? @group.sport : nil
         @group_league = @group ? @group.league : nil
         @user = current_user
-                
+        @saved_picks = @group.picks.where(week: @week_value)
+        @saved_games = @group.games.where(week: @week_value)
         if @group && @user.groups.include?(@group)
+            game_check_or_update(@matchups, @saved_games)
             render inertia: "groups/index", props: {
               matchups: @matchups,
               current_week: @current_week.value,
@@ -22,8 +24,8 @@ class HomeController < ApplicationController
               users: @group.users,
               week: @week_value,
               week_calendar: @week_calendar,
-              saved_picks: @group.picks.where(week: @week_value),
-              saved_games: @group.games.where(week: @week_value),
+              saved_picks: @saved_picks,
+              saved_games: @saved_games,
               all_picks: @group.picks.where('week <= ?', @week_value),
               all_games: @group.games.where('week <= ?', @week_value),
               current_group: @group,
@@ -122,7 +124,9 @@ class HomeController < ApplicationController
         @week_calendar = @group ? get_calendar_by_week_value(@group, @week_value) : nil
         @matchups = helpers.espnScores(@week_value, @group.sport, @group.league)
         @user = params[:user_id] ? User.find(params[:user_id]) : current_user
+        @saved_games = @group.games.where(week: @week_value)
         if @group && @user.groups.include?(@group)
+            game_check_or_update(@matchups, @saved_games)
             render inertia: "matchups/index", props: {
                 matchups: @matchups,
                 current_week: current_week(@group).first.value,
@@ -131,7 +135,7 @@ class HomeController < ApplicationController
                 week: @week_value,
                 week_calendar: @week_calendar,
                 saved_picks: @group.picks.where(week: @week_value).where(user_id: current_user.id),
-                saved_games: @group.games.where(week: @week_value),
+                saved_games: @saved_games,
                 current_group: @group,
                 user_groups: current_user.groups,
                 current_calendar: current_week(@group).first,
@@ -170,6 +174,20 @@ class HomeController < ApplicationController
     end
 
     private
+    def game_check_or_update(matchups, saved_games)
+        logger.info('~~~~~~~~~~~~~~~~~CHECKING GAME~~~~~~~~~~~~~~~~~')
+        mapped_save_games = saved_games.map {|sg| sg.remote_game_id.to_s }
+        all_non_pre_events = matchups['events'].select {|e| e['status']['type']['state'] != 'pre' }
+        my_inprogress_games = all_non_pre_events.select {|rg_in_progress| mapped_save_games.include? rg_in_progress['id']}
+        my_inprogress_games.each do |rg_ip|
+            saved_game = saved_games.find {|g| g.remote_game_id == rg_ip['id'].to_i }
+            if !saved_game.completed
+                logger.info('~~~~~~~~~~~~~~~~~UPDATING GAME~~~~~~~~~~~~~~~~~')
+                helpers.update_game(saved_game, matchups['events'])
+            end 
+        end
+    end
+    
     def get_all_calendars(group)
         sport = group.sport || 'football'
         league = group.league || 'college-football'

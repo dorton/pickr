@@ -2,9 +2,11 @@ module MatchupsHelper
 
     def espnScores(week_slug, sport=nil, league='college-football')
         sport = 'football' if league == 'college-football' || league ==  'nfl'
-        q = league == 'college-football' ? 'groups=80' : ''
-        url = "https://site.api.espn.com/apis/site/v2/sports/#{sport}/#{league}/scoreboard?week=#{week_slug.split('_').last}&#{q}"
-        logger.info(url)
+        queries = []
+        queries.push('groups=80') if league == 'college-football'
+        queries.push("week=#{week_slug.split('_').last}") if week_slug.split('_').count > 1
+        url = "https://site.api.espn.com/apis/site/v2/sports/#{sport}/#{league}/scoreboard?#{queries.join('&')}"
+        logger.info("~~~~~~~~~~~~~~~#{url}~~~~~~~~~~~~~~~~~~~~")
         games = HTTParty.get(url)
     end
 
@@ -16,27 +18,31 @@ module MatchupsHelper
         end   
     end
 
-    def weeks_games(week_id)
-        Game.includes(:picks).where(week: week_id)
+    def weeks_games(week_slug)
+        Game.includes(:picks).where(week: week_slug)
     end
 
-    def handle_updating_games(week_id)
-        remote_games = espnScores(week_id)["events"]
-        saved_games = weeks_games(week_id)
+    def update_game(saved_game, remote_games)
+        remote_game = remote_games.find{ |rg| rg['id'].to_i == saved_game['remote_game_id'].to_i }
+        home = get_home_away_team(remote_game, 'home')
+        away = get_home_away_team(remote_game, 'away')
+        data = {
+                    home_score: home['score'],
+                    away_score: away['score'],
+                    home_team: home['team']['location'],
+                    away_team: away['team']['location'],
+                    home_team_id: home['id'],
+                    away_team_id: away['id'],
+                    completed: remote_game['competitions'].first['status']['type']['completed']
+                }
+        saved_game.update(data)
+    end
+
+    def handle_updating_games(week_slug, league, sport='football')
+        remote_games = espnScores(week_slug, sport, league)["events"]
+        saved_games = weeks_games(week_slug)
         saved_games.each do |game|
-            remote_game = remote_games.find{ |rg| rg['id'].to_i == game['remote_game_id'].to_i }
-            home = get_home_away_team(remote_game, 'home')
-            away = get_home_away_team(remote_game, 'away')
-            data = {
-                        home_score: home['score'],
-                        away_score: away['score'],
-                        home_team: home['team']['location'],
-                        away_team: away['team']['location'],
-                        home_team_id: home['id'],
-                        away_team_id: away['id'],
-                        completed: remote_game['competitions'].first['status']['type']['completed']
-                    }
-            game.update(data)
+            
         end
     end
 
@@ -45,9 +51,9 @@ module MatchupsHelper
     end
     
 
-    def handle_winning_picks(week_id)
-        remote_games = espnScores(week_id)["events"]
-        saved_games = weeks_games(week_id)
+    def handle_winning_picks(week_slug, league, sport='football')
+        remote_games = espnScores(week_slug)["events"]
+        saved_games = weeks_games(week_slug)
         saved_games.each do |game|
             game.picks.each do |pick|
                 line = pick.remote_team_id == game.favored_team_id ? game.odds.abs : game.odds
