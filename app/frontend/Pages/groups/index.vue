@@ -27,7 +27,7 @@
         <thead>
           <tr>
             <th colspan="2" v-if="saved_games.length > 0" class="text-left">
-              <v-btn @click="szn_view = !szn_view">{{ szn_text }}</v-btn>
+              <!-- <v-btn @click="szn_view = !szn_view">{{ szn_text }}</v-btn> -->
             </th>
             <th v-if="szn_view && saved_games.length > 0 && !all_games_pre" class="text-left"></th>
             <th :class="['text-center', handleBgColor(remote_game)]" v-for="remote_game in sorted_headers" :key="remote_game.id">

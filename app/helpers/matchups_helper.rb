@@ -51,8 +51,10 @@ module MatchupsHelper
     end
     
 
-    def handle_winning_picks(week_slug, league, sport='football')
-        remote_games = espnScores(week_slug, sport, league)["events"]
+    def handle_winning_picks(week_slug, league, sport='football', remote_games=nil)
+        if !remote_games
+            remote_games = espnScores(week_slug, sport, league)["events"]
+        end
         saved_games = weeks_games(week_slug)
         saved_games.each do |game|
             game.picks.each do |pick|

@@ -16,7 +16,7 @@ class HomeController < ApplicationController
         @saved_picks = @group.picks.where(week: @week_value)
         @saved_games = @group.games.where(week: @week_value)
         if @group && @user.groups.include?(@group)
-            game_check_or_update(@matchups, @saved_games)
+            game_check_or_update(@matchups, @saved_games, @week_value, @group_league, @group_sport)
             render inertia: "groups/index", props: {
               matchups: @matchups,
               current_week: @current_week.value,
@@ -126,7 +126,7 @@ class HomeController < ApplicationController
         @user = params[:user_id] ? User.find(params[:user_id]) : current_user
         @saved_games = @group.games.where(week: @week_value)
         if @group && @user.groups.include?(@group)
-            game_check_or_update(@matchups, @saved_games)
+            game_check_or_update(@matchups, @saved_games, @week_value, @group.league, @group.sport)
             render inertia: "matchups/index", props: {
                 matchups: @matchups,
                 current_week: current_week(@group).first.value,
@@ -174,18 +174,22 @@ class HomeController < ApplicationController
     end
 
     private
-    def game_check_or_update(matchups, saved_games)
-        logger.info('~~~~~~~~~~~~~~~~~CHECKING GAME~~~~~~~~~~~~~~~~~')
+    def game_check_or_update(matchups, saved_games, week_slug, league, sport='football')
         mapped_save_games = saved_games.map {|sg| sg.remote_game_id.to_s }
         all_non_pre_events = matchups['events'].select {|e| e['status']['type']['state'] != 'pre' }
         my_inprogress_games = all_non_pre_events.select {|rg_in_progress| mapped_save_games.include? rg_in_progress['id']}
         my_inprogress_games.each do |rg_ip|
             saved_game = saved_games.find {|g| g.remote_game_id == rg_ip['id'].to_i }
             if !saved_game.completed
-                logger.info('~~~~~~~~~~~~~~~~~UPDATING GAME~~~~~~~~~~~~~~~~~')
                 helpers.update_game(saved_game, matchups['events'])
+            else
+                winner_check(week_slug, league, sport, matchups)
             end 
         end
+    end
+
+    def winner_check(week_slug, league, sport, matchups)
+        helpers.handle_winning_picks(week_slug, league, sport, matchups)
     end
     
     def get_all_calendars(group)
