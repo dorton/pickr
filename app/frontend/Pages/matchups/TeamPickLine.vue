@@ -95,8 +95,8 @@ export default {
             return xs
         },
         lgScrn () {
-            const { lg } = this.$vuetify.display
-            return lg
+            const { lgAndUp } = this.$vuetify.display
+            return lgAndUp
         },
         cols () {
             return this.mobile ? 12 : ''
