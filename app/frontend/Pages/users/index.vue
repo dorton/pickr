@@ -33,19 +33,23 @@
           <v-row>
             <v-col v-for="group in managed_groups_with_users" :key="group.id" cols="12" sm="12" md="6">
               <v-card>
-                <RemoveFromGroup :group="group" :user="user" :config="config"/>
+                <RemoveFromGroup :group="group" :user="user" :config="config" />
                 <v-card-title class="d-flex align-center">
                   <h4>{{ group.name }}</h4>
-                  <v-icon @click="handleDefault(group)" class="ml-2" size="x-small">{{ starIcon(group) }}</v-icon>
+                  <v-tooltip location="top" :text="default_tooltip_text(group)">
+                    <template v-slot:activator="{ props }">
+                      <v-icon v-bind="props" @click="handleDefault(group)" class="ml-2" size="x-small">{{ starIcon(group) }}</v-icon>
+                    </template>
+                  </v-tooltip>
                 </v-card-title>
                 <v-card-actions class="d-flex justify-space-between">
                   <v-btn color="info" @click="getGroupUrl(group)">Go To Group</v-btn>
-                  <ManageGroup :group="group" :current_user="user" :config="config"/>
+                  <ManageGroup :group="group" :current_user="user" :config="config" />
                 </v-card-actions>
               </v-card>
             </v-col>
             <v-col cols="12" sm="12" md="6">
-              <CreateNewGroup :current_user="user"/>
+              <CreateNewGroup :current_user="user" />
             </v-col>
           </v-row>
         </v-container>
@@ -99,21 +103,27 @@ export default {
       let { xs } = this.$vuetify.display
       return xs ? 'w-100' : 'w-50'
     },
-    cols () {
-        const { smAndUp } = this.$vuetify.display
-        return smAndUp ? 6 : 12
-      },
+    cols() {
+      const { smAndUp } = this.$vuetify.display
+      return smAndUp ? 6 : 12
+    },
   },
   methods: {
+    default_tooltip_text(group) {
+      return this.isGroupDefault(group) ? 'Default Group' : 'Make Default Group'
+    },
     handleDefault(group) {
-      axios.patch(`/groups/${group.id}`, {group: {toggle_default: true, id: group.id }}, this.config).then(() => {
+      axios.patch(`/groups/${group.id}`, { group: { toggle_default: true, id: group.id } }, this.config).then(() => {
         router.reload()
       })
     },
     starIcon(group) {
-      return this.user.group_defaults.map(d => d.id).includes(group.id) ? 'mdi-star' : 'mdi-star-outline'
+      return this.isGroupDefault(group) ? 'mdi-star' : 'mdi-star-outline'
     },
-    createNewGroup() {},
+    isGroupDefault(group) {
+      return this.user.group_defaults.map(d => d.id).includes(group.id)
+    },
+    createNewGroup() { },
     handleAnyParams() {
       const urlParams = new URLSearchParams(window.location.search);
       const pg = urlParams.get('pg');

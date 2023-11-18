@@ -4,7 +4,7 @@
       <v-card v-bind="props" class="h-100">
         <v-card-text class="d-flex align-center justify-center w-100 h-100 flex-column">
             <v-icon flat icon="mdi-plus" size="x-large"></v-icon>
-            <div class="">Add New Group</div>
+            <div class="">Create New Group</div>
         </v-card-text>
       </v-card>
     </template>
