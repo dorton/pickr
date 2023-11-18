@@ -15,9 +15,16 @@ class GroupsController < ApplicationController
 
   # POST /groups
   def create
+    @user = User.find(params[:user][:id])
     @group = Group.new(group_params)
 
     if @group.save
+      @group.users << @user
+      @group.managers << @user
+      if @user.group_defaults.empty?
+        @group.defaults << @user
+      end
+      
       render json: @group, status: :created, location: @group
     else
       render json: @group.errors, status: :unprocessable_entity
@@ -26,6 +33,16 @@ class GroupsController < ApplicationController
 
   # PATCH/PUT /groups/1
   def update
+    if params[:group][:toggle_default]
+      current_user.group_defaults.delete_all
+      if @group.defaults << current_user
+        render json: @group
+      else
+        render json: @group.errors, status: :unprocessable_entity
+      end
+      return
+    end
+    
     if @group.update(group_params)
       render json: @group
     else
@@ -46,6 +63,6 @@ class GroupsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def group_params
-      params.require(:group).permit(:name, :user_id)
+      params.require(:group).permit(:name, :user_id, :slug, :is_private, :league, :sport, :regular_season, :post_season, :max_picks, :spread, :over_under)
     end
 end

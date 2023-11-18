@@ -5,6 +5,8 @@ Rails.application.routes.draw do
   devise_for :users
   resources :matchups
   root "home#index"
+  post 'add-user-as-admin', to: 'home#add_user_as_admin', as: 'add_user_as_admin'
+  post 'remove-user-as-admin', to: 'home#remove_user_as_admin', as: 'remove_user_as_admin'
   post 'adduser', to: 'home#adduser', as: 'adduser'
   post 'removeuser', to: 'home#remove_user', as: 'remove_user'
   get 'manage/groups', to: 'home#manage_groups', as: 'manage_groups'

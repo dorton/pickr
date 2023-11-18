@@ -1,5 +1,5 @@
 <template>
-  <v-card flat class="h-100" color="transparent">
+  <v-card flat class="" color="transparent">
     <v-tabs v-model="tab" color="deep-purple-accent-4" align-tabs="center">
       <v-tab :value="1">Groups</v-tab>
     </v-tabs>
@@ -31,16 +31,21 @@
             </v-col>
           </v-row>
           <v-row>
-            <v-col v-for="group in user_groups" :key="group.id" cols="12" sm="12" md="6">
+            <v-col v-for="group in managed_groups_with_users" :key="group.id" cols="12" sm="12" md="6">
               <v-card>
+                <RemoveFromGroup :group="group" :user="user" :config="config"/>
                 <v-card-title class="d-flex align-center">
                   <h4>{{ group.name }}</h4>
+                  <v-icon @click="handleDefault(group)" class="ml-2" size="x-small">{{ starIcon(group) }}</v-icon>
                 </v-card-title>
-                <v-card-actions>
+                <v-card-actions class="d-flex justify-space-between">
                   <v-btn color="info" @click="getGroupUrl(group)">Go To Group</v-btn>
-                  <v-btn color="error" @click="removeFromGroup(group, user)">Remove Self From Group</v-btn>
+                  <ManageGroup :group="group" :current_user="user" :config="config"/>
                 </v-card-actions>
               </v-card>
+            </v-col>
+            <v-col cols="12" sm="12" md="6">
+              <CreateNewGroup :current_user="user"/>
             </v-col>
           </v-row>
         </v-container>
@@ -61,12 +66,20 @@
 import axios from 'axios'
 import { mapState } from 'vuex'
 import { router } from '@inertiajs/vue3'
+import ManageGroup from './ManageGroup.vue'
+import RemoveFromGroup from './RemoveFromGroup.vue'
+import CreateNewGroup from './CreateNewGroup.vue'
 export default {
   name: "ResolveNoGroup",
   created() {
     this.$store.commit('setMatchups', this.matchups)
     this.local_username = this.user.username
     this.handleAnyParams()
+  },
+  components: {
+    ManageGroup,
+    RemoveFromGroup,
+    CreateNewGroup,
   },
   data() {
     return {
@@ -75,19 +88,32 @@ export default {
       private_slug_id: '',
       title_text: "text-h2",
       other_text: "text-h5",
-      local_username: null
+      local_username: null,
+      manage_group_modal: false,
     };
   },
-  props: ['user', 'week', 'groups', 'calendars', 'user_groups', 'matchups'],
+  props: ['user', 'week', 'groups', 'calendars', 'user_groups', 'matchups', 'managed_groups_with_users'],
   computed: {
     ...mapState(['config']),
     widthClass() {
       let { xs } = this.$vuetify.display
       return xs ? 'w-100' : 'w-50'
-
     },
+    cols () {
+        const { smAndUp } = this.$vuetify.display
+        return smAndUp ? 6 : 12
+      },
   },
   methods: {
+    handleDefault(group) {
+      axios.patch(`/groups/${group.id}`, {group: {toggle_default: true, id: group.id }}, this.config).then(() => {
+        router.reload()
+      })
+    },
+    starIcon(group) {
+      return this.user.group_defaults.map(d => d.id).includes(group.id) ? 'mdi-star' : 'mdi-star-outline'
+    },
+    createNewGroup() {},
     handleAnyParams() {
       const urlParams = new URLSearchParams(window.location.search);
       const pg = urlParams.get('pg');
@@ -113,15 +139,6 @@ export default {
           }
         })
       }
-    },
-    removeFromGroup(group, user) {
-      let data = { user_id: user.id, group_id: group.id, group_slug: group.slug }
-      let url = '/removeuser'
-      axios.post(url, data, this.config).then(r => {
-        if (r.status < 400) {
-          router.reload()
-        }
-      })
     },
     updateUsername() {
       let data = { user: { id: this.user.id, username: this.local_username } }

@@ -5,6 +5,9 @@
         <Link href="/" class="main-header" as="text">{{ titleBarTitle }}</Link>
       </v-app-bar-title>
       <v-spacer></v-spacer>
+      <v-btn v-if="user.is_admin" icon @click="toggleAdminOverride">
+        <v-icon>{{ admin_override_icon }}</v-icon>
+      </v-btn>
       <v-menu v-if="user_groups.length > 1">
         <template v-slot:activator="{ props }">
           <v-btn icon="mdi-dots-vertical" v-bind="props"></v-btn>
@@ -73,8 +76,14 @@ export default {
     titleBarTitle() {
       return this.mobile ? 'SBP' : 'Sports Ball Pickr'
     },
+    admin_override_icon() {
+      return this.admin_override ? 'mdi-lock-open' : 'mdi-lock'
+    }
   },
   methods: {
+    toggleAdminOverride() {
+      this.$store.commit('setAdminOverride', !this.admin_override)
+    },
     changeGroups(group) {
       router.get(`/${group.slug}`)
     },

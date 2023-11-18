@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2023_11_17_125828) do
+ActiveRecord::Schema[7.1].define(version: 2023_11_18_002418) do
   create_table "calendars", force: :cascade do |t|
     t.string "label"
     t.string "alternateLabel"
@@ -75,6 +75,9 @@ ActiveRecord::Schema[7.1].define(version: 2023_11_17_125828) do
     t.string "sport"
     t.boolean "regular_season", default: false
     t.boolean "post_season", default: false
+    t.integer "max_picks", default: 10
+    t.boolean "spread", default: true
+    t.boolean "over_under", default: false
   end
 
   create_table "matchups", force: :cascade do |t|
@@ -114,6 +117,14 @@ ActiveRecord::Schema[7.1].define(version: 2023_11_17_125828) do
     t.integer "user_id"
     t.integer "game_id"
     t.boolean "winner", default: false
+  end
+
+  create_table "user_group_defaults", force: :cascade do |t|
+    t.boolean "default"
+    t.integer "user_id"
+    t.integer "group_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "user_groups", force: :cascade do |t|

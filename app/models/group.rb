@@ -1,6 +1,8 @@
 class Group < ApplicationRecord
-  # has_many :group_managers, dependent: :destroy
-  # has_many :users, as: :manager, through: :group_managers
+  has_many :group_managers, dependent: :destroy
+  has_many :managers, through: :group_managers, source: :user
+  has_many :user_group_defaults, dependent: :destroy
+  has_many :defaults, through: :user_group_defaults, source: :user
   has_many :user_groups, dependent: :destroy
   has_many :users, through: :user_groups
   has_many :group_games, dependent: :destroy

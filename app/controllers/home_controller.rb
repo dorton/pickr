@@ -1,9 +1,9 @@
 class HomeController < ApplicationController
   
     def index
-        @group = params[:group_slug] ? Group.includes(:games, :picks, :users).find_by_slug(params[:group_slug]) : current_user.groups.includes(:games, :picks, :users).first
+        @group = params[:group_slug] ? Group.includes(:games, :picks, :users).find_by_slug(params[:group_slug]) : current_user.group_defaults.includes(:games, :picks, :users).first
         if !@group
-            @group = Group.where(is_private: false).first
+            @group = current_user.group_defaults.first
         end
         
         @current_week = current_week(@group).first
@@ -29,8 +29,8 @@ class HomeController < ApplicationController
               saved_games: @saved_games,
               all_games: @all_games,
               all_picks: @group.picks.where(game_id: @all_games.pluck(:id)),
-              current_group: @group,
-              user_groups: current_user.groups,
+              current_group: @group.as_json(include: [:managers, :users, :defaults]),
+              user_groups: current_user.groups.as_json(include: [:managers, :users, :defaults]),
               current_calendar: @current_week,
               calendars: @group ? get_all_calendars(@group) : nil
             }
@@ -46,7 +46,7 @@ class HomeController < ApplicationController
     def manage_groups
         @group = current_user.groups.first
         if !@group
-            @group = Group.where(is_private: false).first
+            @group = current_user.group_defaults.first
         end
         @week_value = params[:week_id] || current_week(@group).first.value
         @week_calendar = @group ? get_calendar_by_week_value(@group, @week_value) : nil
@@ -55,8 +55,9 @@ class HomeController < ApplicationController
         @matchups = @group ? helpers.espnScores(@week_value, @group.sport, @group.league) : nil
         @user = current_user
         @saved_games = @group ? @group.games.where(week: @week_value) : []
+
         render inertia: "users/index", props: {
-            user: User.includes(:groups).find(@user.id).as_json({groups: :groups}),
+            user: User.includes(:groups).find(@user.id).as_json(include: [:groups, :group_defaults]),
             user_groups: @user.groups,
             week: @week_value,
             groups: Group.all.where(is_private: false),
@@ -65,9 +66,40 @@ class HomeController < ApplicationController
             current_calendar: current_week(@group).first,
             week_calendar: @week_calendar,
             saved_games: @saved_games,
+            managed_groups_with_users: @user.groups.includes(:users).as_json(include: [:users, :managers, :defaults])
         } 
     end
     
+
+    def add_user_as_admin
+        @user = User.find(params[:user][:id])
+        if !params[:group][:id].nil?
+            @group = Group.find(params[:group][:id])
+        elsif !params[:slug].nil?
+            @group = Group.find_by_slug(params[:group][:slug])
+        end
+        if @user && @group
+            @group.managers << @user if !@group.managers.include?(@user)
+            render json: {status: :success}
+        else 
+            render json: {status: :unprocessable_entity, message: 'Sorry, Could Not Find Group. Reach Out To The Group Manager And Make Sure You Have The Correct Code'}
+        end
+    end
+
+    def remove_user_as_admin
+        @user = User.find(params[:user][:id])
+        if !params[:group][:id].nil?
+            @group = Group.find(params[:group][:id])
+        elsif !params[:group][:slug].nil?
+            @group = Group.find_by_slug(params[:group][:slug])
+        end
+        if @user && @group
+            @group.managers.delete(@user)
+            render json: {status: :success}
+        else 
+            render json: {status: :unprocessable_entity, message: 'Sorry, Could Not Find Group. Reach Out To The Group Manager And Make Sure You Have The Correct Code'}
+        end
+    end
 
     def adduser
         @user = current_user
@@ -77,6 +109,9 @@ class HomeController < ApplicationController
             @group = Group.find_by_slug(params[:group_slug])
         end
         if @user && @group
+            if @user.group_defaults.empty?
+                @group.defaults << @user
+            end
             @group.users << @user if !@group.users.include?(@user)
             render json: {status: :success}
         else 
@@ -92,7 +127,11 @@ class HomeController < ApplicationController
             @group = Group.find_by_slug(params[:group_slug])
         end
         if @user && @group
+            if @user.group_defaults.map(&:id).include?(@group.id)
+                @user.group_defaults.delete(@group)
+            end
             @group.users.delete(@user)
+            @user.group_defaults << @user.groups.first if @user.groups.count > 0
             render json: {status: :success}
         else 
             render json: {status: :unprocessable_entity, message: 'Sorry, Could Not Remove From Group. I Dunno.'}
@@ -100,9 +139,9 @@ class HomeController < ApplicationController
     end
 
     def group
-        @group = params[:group_slug] ? Group.find_by_slug(params[:group_slug]) : current_user.groups.first
+        @group = params[:group_slug] ? Group.find_by_slug(params[:group_slug]) : current_user.group_defaults.first
         if !@group
-            @group = Group.where(is_private: false).first
+            @group = current_user.group_defaults.first
         end
         @week = params[:week_id] || current_week(@group).first.value
         @group_sport = @group ? @group.sport : nil
@@ -119,7 +158,7 @@ class HomeController < ApplicationController
     def show
         @group = Group.find_by_slug(params[:group_slug])
         if !@group
-            @group = Group.where(is_private: false).first
+            @group = current_user.group_defaults.first
         end
         @week_value = params[:week_id]
         @week_calendar = @group ? get_calendar_by_week_value(@group, @week_value) : nil
@@ -137,7 +176,7 @@ class HomeController < ApplicationController
                 week_calendar: @week_calendar,
                 saved_picks: @group.picks.where(week: @week_value).where(user_id: current_user.id),
                 saved_games: @saved_games,
-                current_group: @group,
+                current_group: @group.as_json(include: :managers),
                 user_groups: current_user.groups,
                 current_calendar: current_week(@group).first,
                 calendars: @group ? get_all_calendars(@group) : nil
@@ -175,7 +214,21 @@ class HomeController < ApplicationController
     end
 
     private
+    def the_managers
+        self.managers
+    end
+
+    def the_members
+        puts "~~~~~~~~~~~~~~~~~~~~~~MEMBERS METHOD~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+        ids = self.managers.pluck(:id)
+        self.users.select {|u| !ids.include?(u["id"])}
+    end
+    
+    
     def get_all_games(group, calendar)
+        if !group
+            return []
+        end
         group.games.where(calendar_id: get_cal_for_group(group, calendar).pluck(:id))
     end
     
@@ -202,10 +255,14 @@ class HomeController < ApplicationController
     end
     
     def get_all_calendars(group)
-        sport = group.sport || 'football'
-        league = group.league || 'college-football'
-        Calendar.where(sport: group.sport)
-                .where(league: group.league)
+        sport = 'football'
+        league = 'college-football'
+        if group
+            sport = group.sport || 'football'
+            league = group.league || 'college-football'
+        end
+        Calendar.where(sport: sport)
+                .where(league: league)
     end
     
     def get_calendar_by_week_value(group, week_value)

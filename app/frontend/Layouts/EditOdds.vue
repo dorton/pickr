@@ -27,10 +27,10 @@ export default {
             button_text: 'Submit'
         }
     },
-    mounted () {
+    created () {
         if (this.saved_game) {
-            this.odds = this.saved_game.odds;
-            this.favored_team_id = this.saved_game.favored_team_id ? this.saved_game.favored_team_id.toString() : this.saved_game.favored_team_id;
+            this.odds = this.saved_game.odds ? this.saved_game.odds : this.remote_odds;
+            this.favored_team_id = this.saved_game.favored_team_id ? this.saved_game.favored_team_id.toString() : this.remote_favored_team_id;
         }
     },
     computed: {
@@ -46,7 +46,30 @@ export default {
         },
         teams() {
             return this.game.competitions[0].competitors.map(c => c.team)
-        }
+        },
+        remote_odds() {
+            if (this.game.competitions[0].odds && this.game.competitions[0].odds.length > 0) {
+                if(this.game.competitions[0].odds[0].details){
+                    return this.game.competitions[0].odds[0].details.split(' ')[1]
+                }
+                return ''
+            }
+            return ''
+        },
+        remote_favored_team_id() {
+            if (this.game.competitions[0].odds && this.game.competitions[0].odds.length > 0) {
+                if(this.game.competitions[0].odds[0].details){
+                    let team_name = this.game.competitions[0].odds[0].details.split(' ')[0]
+                    let team_obj = this.game.competitions[0].competitors.find(c => c.team.abbreviation === team_name)
+                    if (team_obj) {
+                        return team_obj.id.toString()
+                    }
+                    return ''
+                }
+                return ''
+            }
+            return ''
+        },
     },
     methods: {
         submit() {

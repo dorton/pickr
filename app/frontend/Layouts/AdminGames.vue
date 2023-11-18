@@ -9,8 +9,8 @@
       <v-btn block @click="toggleTheme">toggle theme</v-btn>
     </v-list-item>
     <v-divider v-if="user.is_admin"></v-divider>
-    <v-list-item v-if="weekly_games.length > 0 && user.is_admin" title="Current Games"></v-list-item>
-    <v-list-item v-for="game in weekly_games" :key="game.remote_game_id" v-if="user.is_admin">
+    <v-list-item v-if="weekly_games.length > 0 && showManagerCurrentGames" title="Manage Games"></v-list-item>
+    <v-list-item v-for="game in weekly_games" :key="game.remote_game_id" v-if="showManagerCurrentGames">
       <v-card variant="tonal">
         <v-card-title>
           <div v-if="!isComplete(game)">
@@ -186,6 +186,12 @@ export default {
   computed: {
     ...mapState(['admin_override', 'weekly_games', 'config']),
     ...mapGetters(['all_games_pre', 'all_games_complete', 'week_in_past']),
+    showManagerCurrentGames() {
+      if (this.admin_override) {
+        return true
+      }
+      return this.current_group_manager
+    },
     events() {
       return this.matchups.events
     },
@@ -206,7 +212,13 @@ export default {
     },
     game_dates() {
       return [...new Set(this.filtered_events.map(e => this.formatDate(e.date)))]
-    }
+    },
+    current_group_manager() {
+      if (this.current_group && this.current_group.managers) {
+        return this.current_group.managers.map(m => m.id).includes(this.user.id)
+      }
+      return false
+    },
   },
   methods: {
     handleBroadcast(game) {
@@ -234,11 +246,14 @@ export default {
       }
       return false
     },
-    showButton(_matchup, user) {
+    showButton(matchup, user) {
       if (this.admin_override) {
         return true
       }
-      return user.is_admin && this.all_games_pre && !this.week_in_past
+      if (matchup.status.type.completed) {
+        return false
+      }
+      return this.current_group_manager && this.all_games_pre && !this.week_in_past
     },
     getSavedOdds(remote_game) {
       let saved_game = this.getSavedGameFromRemoteGame(remote_game)

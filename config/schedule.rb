@@ -21,8 +21,8 @@
 #     runner "WinnerCheckJob.perform_later()"
 # end
 
-every :sunday, at: '12am' do # Use any day of the week or :weekend, :weekday
-    runner "WinnerCheckJob.perform_later()"
-end
+# every :sunday, at: '12am' do # Use any day of the week or :weekend, :weekday
+#     runner "WinnerCheckJob.perform_later()"
+# end
 
 # Learn more: http://github.com/javan/whenever
