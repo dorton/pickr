@@ -212,6 +212,9 @@ import { mapState, mapGetters } from 'vuex'
 export default {
   name: "Group",
   created() {
+    setInterval(() => {
+      router.reload();
+    }, 60000);
     this.selected_calendar = this.week
     this.$store.commit('setMatchups', this.matchups)
     this.$store.commit('setWeeklyPicks', []) 
