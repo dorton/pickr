@@ -54,7 +54,7 @@
 import moment from 'moment'
 import { mapGetters } from 'vuex'
 export default {
-    props: ['remote_game', 'picks', 'week', 'saved_game', 'admin_override', 'user'],
+    props: ['remote_game', 'picks', 'week', 'saved_game', 'admin_override', 'user', 'auto_select_conf', 'clear_selections'],
     data() {
         return {
             confidence_selections: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
@@ -75,14 +75,19 @@ export default {
         }
     },
     watch: {
+        clear_selections(v) {
+            if (v) {
+                this.handleClearSelections()
+            }
+        },
         confidence(v) {
-            if (this.saved_game) {
+            if (this.saved_game && v) {
                 let out = {id: this.pick_id, week: this.week, remote_game_id: this.remote_game.id, confidence: v, remote_team_id: this.team_id, user_id: this.user.id, game_id: this.saved_game.id }
                 this.$emit('confChange', out)
             }
         },
         team_id(v) {
-            if (this.saved_game) {
+            if (this.saved_game && v) {
                 let out = {id: this.pick_id, week: this.week, remote_game_id: this.remote_game.id, confidence: this.confidence, remote_team_id: v, user_id: this.user.id, game_id: this.saved_game.id }
                 this.$emit('confChange', out)
             }
@@ -204,6 +209,12 @@ export default {
         }
     },
     methods: {
+        handleClearSelections() {
+            this.confidence = ''
+            this.pick_id = null
+            this.team_id = null
+            this.$store.commit('setWeeklyPicks', [])
+        },
         isSelected(homeAway) {
             let id = this.team_id ? this.team_id.toString() : ''
             return this.getTeam(homeAway).id.toString() === id
@@ -211,7 +222,7 @@ export default {
         setSelection(homeAway) {
             if (!this.shouldDisableSelect) {
                 this.team_id = this.getTeam(homeAway).id
-                if (this.confidence.length < 1) {
+                if (this.confidence.length < 1 && this.auto_select_conf === 'On') {
                     this.confidence = 10 - this.otherPicks.length
                 }
             }

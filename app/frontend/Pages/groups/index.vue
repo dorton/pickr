@@ -5,7 +5,9 @@
         <div class="d-flex justify-center align-center">
           <div class="text-h4">{{ current_group.name }}</div>
           <div class="ml-2">
-            <v-tooltip location="bottom" text="refresh scores">
+            <v-btn v-if="mobile" :loading="reloading" @click="refreshScores()" color="transparent" flat icon="mdi-reload"
+              size="x-small"></v-btn>
+            <v-tooltip v-else location="right" text="refresh scores">
               <template v-slot:activator="{ props }">
                 <v-btn :loading="reloading" v-bind="props" @click="refreshScores()" color="transparent" flat icon="mdi-reload"
                   size="x-small"></v-btn>
@@ -247,6 +249,10 @@ export default {
   computed: {
     ...mapState(['weekly_picks', 'weekly_games', 'admin_override']),
     ...mapGetters(['all_games_pre', 'all_games_complete']),
+    mobile() {
+      const { xs } = this.$vuetify.display
+      return xs
+    },
     szn_text() {
       return this.szn_view ? 'Week View' : 'Season View'
     },

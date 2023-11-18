@@ -19,17 +19,28 @@
         <v-card-title>
           <div class="title-wrapper">
             <div class="title">{{ user.username }} Picks</div>
-            <div class="submit" v-if="canSubmit"><v-btn :loading="loading" color="success"
-                @click="handleSubmit()">{{ button_text }}</v-btn></div>
+            <div class="d-flex align-center justify-space-between">
+              <div v-if="show_switch" class="ml-2">
+                <v-switch v-model="auto_select_conf" hide-details true-value="On" false-value="Off" color="primary"
+                  label="Autofill Ranks"></v-switch>
+              </div>
+              <div v-if="show_clear" class="ml-2">
+                <v-btn color="info" variant="outlined" @click="handleClearSelections()">clear</v-btn>
+              </div>
+              <v-btn class="submit ml-2" v-if="canSubmit" :loading="loading" color="success" @click="handleSubmit()">{{
+                button_text }}</v-btn>
+            </div>
           </div>
         </v-card-title>
         <div v-for="(day, gd_index) in game_dates" :key="gd_index">
-          <div :class="['date-wrapper text-subtitle-1', mobile ? '' : 'text-right', 'bg-grey-darken-2', 'px-3', 'py-1', 'font-weight-bold']">{{ day }}</div>
+          <div
+            :class="['date-wrapper text-subtitle-1', mobile ? '' : 'text-right', 'bg-grey-darken-2', 'px-3', 'py-1', 'font-weight-bold']">
+            {{ day }}</div>
           <v-card color="grey-lighten-4" class="mb-2" elevation="5">
             <v-card-text class="team-pick-card">
               <TeamPickLine v-for="(game, i) in gamesOnDay(day)" :key="game.id" :remote_game="game" :picks="weekly_picks"
                 @confChange="setConf" :week="handleWeek" :saved_game="getSavedGame(game)" :admin_override="admin_override"
-                :user="user">
+                :user="user" :auto_select_conf="auto_select_conf" :clear_selections="clear_selections">
                 <v-divider v-if="i + 1 !== gamesOnDay(day).length" class="" thickness="3px"></v-divider>
               </TeamPickLine>
             </v-card-text>
@@ -64,6 +75,8 @@ export default {
   },
   data() {
     return {
+      clear_selections: false,
+      auto_select_conf: 'On',
       loading: false,
       button_text: "Submit",
       // admin_override: false,
@@ -103,9 +116,18 @@ export default {
     }
   },
   computed: {
-    mobile () {
-        const { xs } = this.$vuetify.display
-        return xs
+    show_switch(){
+      return this.saved_picks.length < 1
+    },
+    show_clear() {
+      if(this.saved_picks.length > 0 && this.weekly_picks.length > 0) {
+        return false
+      }
+      return this.weekly_picks && this.weekly_picks.length > 0
+    },
+    mobile() {
+      const { xs } = this.$vuetify.display
+      return xs
     },
     sorted_games() {
       return this.weekly_games.sort((a, b) => this.findIndex(a.id) - this.findIndex(b.id))
@@ -158,6 +180,12 @@ export default {
     }
   },
   methods: {
+    handleClearSelections() {
+      this.clear_selections = true;
+      setTimeout(() => {
+        this.clear_selections = false
+      }, 100);
+    },
     gamesOnDay(day) {
       return this.sorted_games.filter(e => day === this.formatDate(e.date))
     },
@@ -203,6 +231,7 @@ export default {
         if (r.status === 200) {
           this.button_text = "Updated"
           this.loading = false
+          router.reload()
         }
 
       }).catch(() => {
