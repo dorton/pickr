@@ -2,8 +2,16 @@
   <v-container fluid class="h-75">
     <v-row class="justify-center align-center">
       <v-col>
-        <div class="d-flex justify-center">
+        <div class="d-flex justify-center align-center">
           <div class="text-h4">{{ current_group.name }}</div>
+          <div class="ml-2">
+            <v-tooltip location="bottom" text="refresh scores">
+              <template v-slot:activator="{ props }">
+                <v-btn :loading="reloading" v-bind="props" @click="refreshScores()" color="transparent" flat icon="mdi-reload"
+                  size="x-small"></v-btn>
+              </template>
+            </v-tooltip>
+          </div>
         </div>
       </v-col>
       <v-col>
@@ -232,6 +240,7 @@ export default {
       selected_calendar: '',
       rows_clicked: [],
       szn_view: false,
+      reloading: false,
     };
   },
   props: ['matchups', 'current_week', 'user', 'week', 'saved_picks', 'saved_games', 'current_group', 'users', 'user_groups', 'current_calendar', 'calendars', 'all_picks', 'all_games'],
@@ -276,6 +285,18 @@ export default {
     }
   },
   methods: {
+    refreshScores() {
+      this.reloading = true
+      this.reload().then(() => {
+        this.reloading = false
+      })
+    },
+    reload() {
+      return new Promise((resolve) => {
+        let reloaded = router.reload()
+        resolve(reloaded)
+      });
+    },
     handleBroadcast(game) {
       let comps = game.competitions[0]
       return comps.broadcasts && comps.broadcasts[0] && comps.broadcasts[0].names ? comps.broadcasts[0].names[0] : ''
