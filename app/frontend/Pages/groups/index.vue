@@ -155,11 +155,11 @@
               </div>
             </td>
             <td v-for="remote_game in sorted_headers" :key="remote_game.id">
-              <div :class="['d-flex flex-column align-center mt-1', handleScoreClass(remote_game, u.id)]" v-if="!all_games_pre">
+              <div :class="['d-flex align-center justify-center mt-1', handleScoreClass(remote_game, u.id)]" v-if="!all_games_pre">
                 <div class="team-pick">
                   {{ getTeamPickFromRemote(remote_game, u.id) ? getTeamPickFromRemote(remote_game, u.id).team.abbreviation : 'No Pick' }}
                 </div>
-                <div class="">
+                <div class="ml-2 text-caption font-weight-bold">
                   {{ getConfidenceFromRemote(remote_game, u.id) | '' }}
                 </div>
               </div>
