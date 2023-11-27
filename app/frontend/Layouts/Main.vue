@@ -37,7 +37,7 @@
           Logout
         </v-btn>
       </v-list-item>
-      <AdminGames v-if="drawer && saved_games" :user="user" :week="week" :current_group="current_group" :current_calendar="current_calendar" :matchups="matchups" :saved_games="saved_games" />
+      <AdminGames v-if="drawer && saved_games" :user="user" :week="week" :current_group="current_group" :current_calendar="current_calendar" :matchups="matchups" :saved_games="saved_games" :setting="setting" @set-theme="setTheme" />
     </v-navigation-drawer>
     <v-main>
       <slot></slot>
@@ -50,6 +50,7 @@ import AdminGames from './AdminGames.vue'
 import { Link } from '@inertiajs/vue3'
 import { mapState } from 'vuex'
 import { router } from '@inertiajs/vue3'
+import { useTheme } from 'vuetify'
 import axios from 'axios'
 export default {
   name: "Main Layout",
@@ -60,13 +61,26 @@ export default {
   created() {
     this.$store.commit('setMatchups', this.matchups)
     this.$store.commit('setWeekCalendar', this.week_calendar)
+    if (this.setting) {
+      this.setTheme(this.setting.theme)
+    }
+  },
+  setup () {
+    const theme = useTheme()
+
+    function setTheme(th) {
+      theme.global.name.value = th
+    }
+    return {
+      setTheme
+    }
   },
   data() {
     return {
       drawer: false
     };
   },
-  props: ['matchups', 'user', 'saved_games', 'saved_picks', 'current_group', 'week', 'user_groups', 'current_calendar', 'week_calendar'],
+  props: ['matchups', 'user', 'saved_games', 'saved_picks', 'current_group', 'week', 'user_groups', 'current_calendar', 'week_calendar', 'setting'],
   computed: {
     ...mapState(['weekly_picks', 'weekly_games', 'admin_override', 'config']),
     mobile () {

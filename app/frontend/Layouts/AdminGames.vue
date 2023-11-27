@@ -1,12 +1,7 @@
 <template>
   <span>
-    <v-list-item v-if="user.is_admin">
-      <v-btn block @click="toggleOverride">
-        {{ admin_override ? 'Lock' : 'Unlock' }}
-      </v-btn>
-    </v-list-item>
-    <v-list-item v-if="user.is_admin">
-      <v-btn block @click="toggleTheme">toggle theme</v-btn>
+    <v-list-item>
+      <v-btn block @click="handleTheme">toggle theme</v-btn>
     </v-list-item>
     <v-divider v-if="user.is_admin"></v-divider>
     <v-list-item v-if="weekly_games.length > 0 && showManagerCurrentGames" title="Manage Games"></v-list-item>
@@ -153,15 +148,19 @@
     </v-list-item>
   </span>
 </template>
-<script setup>
+<!-- <script setup>
 import { useTheme } from 'vuetify'
 
 const theme = useTheme()
 
-function toggleTheme () {
-  theme.global.name.value = theme.global.current.value.dark ? 'light' : 'dark'
+function setTheme(th) {
+  theme.global.name.value = th
 }
-</script>
+
+function toggleTheme(th) {
+  theme.global.name.value = th === 'dark' ? 'light' : 'dark'
+}
+</script> -->
 
 <script>
 import EditOdds from './EditOdds.vue'
@@ -169,7 +168,6 @@ import { mapState, mapGetters } from 'vuex'
 import moment from 'moment'
 import axios from 'axios'
 import { router } from '@inertiajs/vue3'
-import { useTheme } from 'vuetify'
 export default {
   name: "AdminGames",
   components: {
@@ -182,7 +180,7 @@ export default {
       conf_name: null
     };
   },
-  props: ['week', 'matchups', 'saved_games', 'current_group', 'saved_games', 'user'],
+  props: ['week', 'matchups', 'saved_games', 'current_group', 'saved_games', 'user', 'setting'],
   computed: {
     ...mapState(['admin_override', 'weekly_games', 'config']),
     ...mapGetters(['all_games_pre', 'all_games_complete', 'week_in_past']),
@@ -221,6 +219,15 @@ export default {
     },
   },
   methods: {
+    handleTheme() {
+      let current_theme = this.setting ? this.setting.theme : 'dark'
+      let new_theme = current_theme === 'dark' ? 'light' : 'dark'
+      let obj =  {setting: {theme: new_theme, user_id: this.user.id}}
+      axios.post('/settings', obj, this.config).then((r) => {
+        this.$emit('setTheme', r.data.theme)
+        router.reload()
+      })
+    },
     handleBroadcast(game) {
       let comps = game.competitions[0]
       return comps.broadcasts && comps.broadcasts[0] && comps.broadcasts[0].names ? comps.broadcasts[0].names[0] : ''

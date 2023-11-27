@@ -22,6 +22,7 @@ class HomeController < ApplicationController
               matchups: @matchups,
               current_week: @current_week.value,
               user: @user,
+              setting: @user.setting,
               users: @group.users,
               week: @week_value,
               week_calendar: @week_calendar,
