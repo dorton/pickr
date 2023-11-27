@@ -24,7 +24,7 @@
                 <v-list-item v-for="user in group.users" :key="user.id">
                   <v-list-item-title>
                     <div class="d-flex align-center justify-space-between">
-                      <div>{{ user.username }}</div>
+                      <div>{{ user.username }} <span v-if="isManager(user)">(manager)</span></div>
                       <div v-if="current_user_manager">
                         <div v-if="isManager(user)"> <v-btn :disabled="last_manager_standing" @click="handleRemoveManager(user)">remove manager</v-btn></div>
                         <div v-else> <v-btn @click="handleMakeManager(user)">make manager</v-btn></div>
@@ -34,13 +34,39 @@
                 </v-list-item>
               </v-list>
             </v-col>
+            <v-col v-if="current_user_manager">
+              <v-select
+                    label="Sport"
+                    v-model="local_sport"
+                    :items="sports"
+                    :rules="[v => !!v || 'Sport is required']"
+                    required
+                    hide-details
+                    density="compact"
+                  ></v-select>
+                  <v-select
+                    label="League"
+                    v-model="local_league"
+                    :items="leagues"
+                    :rules="[v => !!v || 'League is required']"
+                    required
+                    hide-details
+                    density="compact"
+                  ></v-select>
+              <v-text-field label="Max Picks/Week" v-model="local_max" hide-details density="compact"></v-text-field>
+            </v-col>
+            <v-col v-else>
+              <div>Sport: {{ local_sport }}</div>
+              <div>League: {{ local_league }}</div>
+              <div>Max Picks/Week : {{ local_max }}</div>
+            </v-col>
           </v-row>
         </v-card-text>
 
         <v-card-actions>
           <v-spacer></v-spacer>
 
-          <v-btn text="Submit" @click="handleSubmit(isActive)"></v-btn>
+          <v-btn v-if="current_user_manager" text="Submit" @click="handleSubmit(isActive)"></v-btn>
         </v-card-actions>
       </v-card>
     </template>
@@ -55,21 +81,34 @@ export default {
   name: "Manage Group",
   created() {
     this.local_name = this.group.name
+    this.local_league = this.group.league
+    this.local_sport = this.group.sport
+    this.local_max = this.group.max_picks
   },
   data() {
     return {
       edit: false,
       local_name: '',
+      local_league: '',
+      local_sport: '',
+      local_max: '',
+
     };
   },
   props: ['group', 'current_user'],
   computed: {
     ...mapState(['config', 'admin_override']),
+    sports() {
+      return ['football']
+    },
+    leagues() {
+      return ['nfl', 'college-football']
+    },
     edit_text() {
       return this.edit ? 'lock' : 'edit'
     },
     group_object() {
-      return { group: { name: this.local_name } }
+      return { group: { name: this.local_name, league: this.local_league, sport: this.local_sport, max_picks: this.local_max } }
     },
     url() {
       return `/groups/${this.group.id}`

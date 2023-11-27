@@ -61,7 +61,7 @@ module MatchupsHelper
                 line = pick.remote_team_id == game.favored_team_id ? game.odds.abs : game.odds
                 favored_score = pick.remote_team_id == game.home_team_id ? 'home_score' : 'away_score'
                 other_score = favored_score == 'away_score' ?  'home_score' : 'away_score'
-                if (game[favored_score].to_i - game[other_score].to_i) > line
+                if line && ((game[favored_score].to_i - game[other_score].to_i) > line)
                     pick.update(winner: true) if game.completed
                 end
             end

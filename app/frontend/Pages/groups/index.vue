@@ -104,8 +104,9 @@
                 <div class="text-caption fav mr-1">
                   {{ getFavoredTeam(header) ? getFavoredTeam(header).team.abbreviation : 'No Team' }}
                 </div>
-                <div class="text-caption odds">
-                  {{ getSavedOdds(header) }}
+                <div class="d-flex align-center">
+                  <div class="text-caption odds">{{ getSavedOdds(header) }}</div>
+                  <v-icon v-if="getIcon(header)" class="ml-1" size="x-small" :icon="getIcon(header)"></v-icon>
                 </div>
               </div>
             </th>
@@ -371,7 +372,7 @@ export default {
       return this.hasTenPicks(user_id) ? 'Picks In' : 'Picks Not In'
     },
     hasTenPicks(user_id) {
-      return this.saved_picks.filter(s => s.user_id === user_id).length === 10
+      return this.saved_picks.filter(s => s.user_id === user_id).length === this.current_group.max_picks
     },
     getSeasonPoints(user_id) {
       let winner_picks = this.all_picks.filter(p => p.user_id === user_id && p.winner).map(w => w.confidence)
@@ -458,6 +459,9 @@ export default {
     },
     getSavedOdds(remote_game) {
       return this.getSavedFromRemote(remote_game).odds
+    },
+    getIcon(saved_game) {
+      return null
     },
     getRemoteTeamFromId(remote_game, remote_team_id) {
       if (remote_team_id) {

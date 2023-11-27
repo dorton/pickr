@@ -19,7 +19,7 @@
         <v-card-title>
           <div class="title-wrapper">
             <div class="title">{{ user.username }} Picks</div>
-            <div class="d-flex align-center justify-space-between">
+            <div :class="['d-flex', buttonClasses]">
               <div v-if="show_switch" class="ml-2">
                 <v-switch v-model="auto_select_conf" hide-details true-value="On" false-value="Off" color="primary"
                   label="Autofill Ranks"></v-switch>
@@ -27,8 +27,10 @@
               <div v-if="show_clear" class="ml-2">
                 <v-btn color="info" variant="outlined" @click="handleClearSelections()">clear</v-btn>
               </div>
-              <v-btn class="submit ml-2" v-if="canSubmit" :loading="loading" color="success" @click="handleSubmit()">{{
-                button_text }}</v-btn>
+              <div>
+                <v-btn class="submit ml-2" v-if="canSubmit && !mobile" :loading="loading" color="success" @click="handleSubmit()">{{
+                  button_text }}</v-btn>
+              </div>
             </div>
           </div>
         </v-card-title>
@@ -52,6 +54,10 @@
       <div class="text-h4 text-center">Games For This Week Not Selected</div>
     </v-row>
     <v-row class="d-sm-none">
+      <v-col cols="12">
+          <v-btn block class="submit" v-if="canSubmit" :loading="loading" color="success" @click="handleSubmit()">{{
+            button_text }}</v-btn>
+      </v-col>
       <v-col>
         <v-select hide-details density="compact" flat single-line :items="calendars" item-value="value" item-title="label"
           v-model="selected_calendar" @update:modelValue="navToWeek"></v-select>
@@ -116,6 +122,9 @@ export default {
     }
   },
   computed: {
+    buttonClasses() {
+      return this.mobile ? 'align-end flex-column' : 'align-center justify-space-between'
+    },
     show_switch(){
       return this.saved_picks.length < 1
     },
