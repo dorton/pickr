@@ -18,7 +18,7 @@
             v-for="(group, i) in user_groups"
             :key="i"
           >
-            <v-list-item-title @click="changeGroups(group)">{{ group.name }}</v-list-item-title>
+            <v-list-item-title class="clicky-header" @click="changeGroups(group)">{{ group.name }}</v-list-item-title>
           </v-list-item>
         </v-list>
       </v-menu>
@@ -130,6 +130,10 @@ export default {
 
 <style>
 .v-app-bar-title .main-header {
+  cursor: pointer;
+}
+
+.clicky-header {
   cursor: pointer;
 }
 </style>
