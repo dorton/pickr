@@ -372,7 +372,7 @@ export default {
       return this.hasTenPicks(user_id) ? 'Picks In' : 'Picks Not In'
     },
     hasTenPicks(user_id) {
-      return this.saved_picks.filter(s => s.user_id === user_id).length === this.current_group.max_picks
+      return this.saved_picks.filter(s => s.user_id === user_id).length === this.weekly_games.length
     },
     getSeasonPoints(user_id) {
       let winner_picks = this.all_picks.filter(p => p.user_id === user_id && p.winner).map(w => w.confidence)

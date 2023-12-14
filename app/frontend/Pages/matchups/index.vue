@@ -41,7 +41,7 @@
           <v-card color="grey-lighten-4" class="mb-2" elevation="5">
             <v-card-text class="team-pick-card">
               <TeamPickLine v-for="(game, i) in gamesOnDay(day)" :key="game.id" :remote_game="game" :picks="weekly_picks"
-                @confChange="setConf" :week="handleWeek" :saved_game="getSavedGame(game)" :admin_override="admin_override"
+                @confChange="setConf" :week="handleWeek" :saved_game="getSavedGame(game)" :admin_override="admin_override" :saved_games_length="saved_games.length"
                 :user="user" :auto_select_conf="auto_select_conf" :clear_selections="clear_selections">
                 <v-divider v-if="i + 1 !== gamesOnDay(day).length" class="" thickness="3px"></v-divider>
               </TeamPickLine>
@@ -169,7 +169,7 @@ export default {
       }
       if (this.weekly_games && this.weekly_games[0]) {
         if (moment().isBefore(moment(this.weekly_games[0].date))) {
-          return (this.weekly_picks.length === 10 && this.noDups)
+          return (this.weekly_picks.length === this.weekly_games.length && this.noDups)
         }
         return moment().isBefore(moment(this.weekly_games[0].date))
       }
@@ -290,12 +290,12 @@ export default {
       })
     },
     addGame(game) {
-      if (this.weekly_games.length < 10) {
+      if (this.weekly_games.length < this.current_group.max_picks) {
         let data = { game: { week: this.handleWeek, remote_game_id: game.id, set_odds: null }, group: this.current_group }
         console.log('data: ', data);
         axios.post('/games', data, this.config).then(r => {
           console.log('response: ', r.data);
-          if (!this.gameInWeek(game) && this.weekly_games.length < 10) {
+          if (!this.gameInWeek(game) && this.weekly_games.length < this.current_group.max_picks) {
             this.weekly_games.push(game)
           }
         })

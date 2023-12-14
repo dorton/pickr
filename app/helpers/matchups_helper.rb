@@ -2,8 +2,12 @@ module MatchupsHelper
 
     def espnScores(week_slug, sport=nil, league='college-football')
         sport = 'football' if league == 'college-football' || league ==  'nfl'
+        seasontype = week_slug.split('_').first == 'post' ? 3 : 2
         queries = []
-        queries.push('groups=80') if league == 'college-football'
+        if league == 'college-football'
+            queries.push('groups=80') 
+        end
+        queries.push("seasontype=#{seasontype}") 
         queries.push("week=#{week_slug.split('_').last}") if week_slug.split('_').count > 1
         url = "https://site.api.espn.com/apis/site/v2/sports/#{sport}/#{league}/scoreboard?#{queries.join('&')}"
         logger.info("~~~~~~~~~~~~~~~#{url}~~~~~~~~~~~~~~~~~~~~")

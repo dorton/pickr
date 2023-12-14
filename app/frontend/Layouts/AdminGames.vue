@@ -341,7 +341,7 @@ export default {
       })
     },
     addGame(game) {
-      if (this.weekly_games.length < 10) {
+      if (this.weekly_games.length < this.current_group.max_picks) {
         let home = game.competitions[0].competitors.find(c => c.homeAway === 'home')
         let away = game.competitions[0].competitors.find(c => c.homeAway === 'away')
         let completed = game.status.type.completed
@@ -359,7 +359,7 @@ export default {
                           }, 
                     group: this.current_group }
         axios.post('/games', data, this.config).then(r => {
-          if (!this.gameInWeek(game) && this.weekly_games.length < 10) {
+          if (!this.gameInWeek(game) && this.weekly_games.length < this.current_group.max_picks) {
             this.$store.commit('pushWeeklyGames', game)
           }
           router.reload()

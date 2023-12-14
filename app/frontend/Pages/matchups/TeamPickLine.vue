@@ -54,10 +54,10 @@
 import moment from 'moment'
 import { mapGetters } from 'vuex'
 export default {
-    props: ['remote_game', 'picks', 'week', 'saved_game', 'admin_override', 'user', 'auto_select_conf', 'clear_selections'],
+    props: ['remote_game', 'picks', 'week', 'saved_game', 'admin_override', 'user', 'auto_select_conf', 'clear_selections', 'saved_games_length'],
     data() {
         return {
-            confidence_selections: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+            // confidence_selections: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
             confidence: '',
             height: '90px',
             team_id: null,
@@ -95,6 +95,10 @@ export default {
     },
     computed: {
         ...mapGetters(['all_games_pre']),
+        confidence_selections() {
+            let length = this.saved_games_length ? this.saved_games_length : 10
+            return Array.from({length: length}, (_, i) => i + 1)
+        },
         mobile () {
             const { xs } = this.$vuetify.display
             return xs
@@ -223,7 +227,7 @@ export default {
             if (!this.shouldDisableSelect) {
                 this.team_id = this.getTeam(homeAway).id
                 if (this.confidence.length < 1 && this.auto_select_conf === 'On') {
-                    this.confidence = 10 - this.otherPicks.length
+                    this.confidence = this.saved_games_length - this.otherPicks.length
                 }
             }
         },
