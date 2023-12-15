@@ -95,6 +95,9 @@ export default {
     },
     computed: {
         ...mapGetters(['all_games_pre']),
+        isPostSeason() {
+            return this.saved_game.week.split('_')[0] === 'post'
+        },
         confidence_selections() {
             let length = this.saved_games_length ? this.saved_games_length : 10
             return Array.from({length: length}, (_, i) => i + 1)
@@ -155,6 +158,11 @@ export default {
             if (this.admin_override) {
                 return false
             }
+            if (this.isPostSeason) {
+                if (!this.gameStarted) {
+                    return false
+                }
+            }
             return this.team_id === null || !this.all_games_pre
         },
         saved_odds() {
@@ -195,6 +203,9 @@ export default {
         gameStation() {
             let comps = this.remote_game.competitions[0]
             return comps.broadcasts && comps.broadcasts[0] && comps.broadcasts[0].names ? comps.broadcasts[0].names[0] : ''
+        },
+        gameStarted() {
+            return this.gameState !== 'pre' && moment().isSameOrAfter(this.remote_game.competitions[0].date, 'minute');
         },
         gameTime() {
             return moment(this.remote_game.competitions[0].date).format('h:mma')
