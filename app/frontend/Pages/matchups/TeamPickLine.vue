@@ -154,18 +154,6 @@ export default {
         favoredHomeAway() {
             return this.favored_team ? this.favored_team.homeAway : null
         },
-        shouldDisableDrop() {
-            if (this.admin_override) {
-                return false
-            }
-            if (this.isPostSeason) {
-                if (!this.gameStarted) {
-                    return false
-                }
-                
-            }
-            return this.team_id === null || !this.all_games_pre
-        },
         saved_odds() {
             if (this.saved_game && this.saved_game.odds) {
                 return this.saved_game.odds
@@ -206,7 +194,7 @@ export default {
             return comps.broadcasts && comps.broadcasts[0] && comps.broadcasts[0].names ? comps.broadcasts[0].names[0] : ''
         },
         gameStarted() {
-            return this.gameState !== 'pre' && moment().isSameOrAfter(this.remote_game.competitions[0].date, 'minute');
+            return moment().isSameOrAfter(this.remote_game.competitions[0].date, 'minute');
         },
         gameTime() {
             return moment(this.remote_game.competitions[0].date).format('h:mma')
@@ -217,9 +205,21 @@ export default {
         gameState() {
             return this.remote_game.status.type.state
         },
+        shouldDisableDrop() {
+            if (this.admin_override) {
+                return false
+            }
+            if (this.isPostSeason) {
+                return this.gameStarted
+            }
+            return this.team_id === null || !this.all_games_pre
+        },
         shouldDisableSelect() {
             if (this.admin_override) {
                 return false
+            }
+            if (this.isPostSeason) {
+                return this.gameStarted
             }
             return !this.all_games_pre
         }
