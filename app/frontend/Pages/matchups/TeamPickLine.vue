@@ -162,6 +162,7 @@ export default {
                 if (!this.gameStarted) {
                     return false
                 }
+                
             }
             return this.team_id === null || !this.all_games_pre
         },

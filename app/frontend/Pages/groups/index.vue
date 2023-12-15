@@ -9,8 +9,8 @@
               size="x-small"></v-btn>
             <v-tooltip v-else location="right" text="refresh scores">
               <template v-slot:activator="{ props }">
-                <v-btn :loading="reloading" v-bind="props" @click="refreshScores()" color="transparent" flat icon="mdi-reload"
-                  size="x-small"></v-btn>
+                <v-btn :loading="reloading" v-bind="props" @click="refreshScores()" color="transparent" flat
+                  icon="mdi-reload" size="x-small"></v-btn>
               </template>
             </v-tooltip>
           </div>
@@ -22,14 +22,14 @@
         </div>
       </v-col>
       <v-col class="d-none d-sm-flex">
-        <v-select hide-details density="compact" flat single-line :items="calendars" item-value="value" item-title="label" v-model="selected_calendar"
-          @update:modelValue="navToWeek"></v-select>
+        <v-select hide-details density="compact" flat single-line :items="calendars" item-value="value" item-title="label"
+          v-model="selected_calendar" @update:modelValue="navToWeek"></v-select>
       </v-col>
     </v-row>
     <v-row class="d-sm-none">
       <v-col>
-        <v-select hide-details density="compact" flat single-line :items="calendars" item-value="value" item-title="label" v-model="selected_calendar"
-          @update:modelValue="navToWeek"></v-select>
+        <v-select hide-details density="compact" flat single-line :items="calendars" item-value="value" item-title="label"
+          v-model="selected_calendar" @update:modelValue="navToWeek"></v-select>
       </v-col>
     </v-row>
     <v-row v-if="saved_games.length > 0">
@@ -40,7 +40,8 @@
               <v-btn @click="szn_view = !szn_view">{{ szn_text }}</v-btn>
             </th>
             <th v-if="szn_view && saved_games.length > 0 && !all_games_pre" class="text-left"></th>
-            <th :class="['text-center', handleBgColor(remote_game)]" v-for="remote_game in sorted_headers" :key="remote_game.id">
+            <th :class="['text-center', handleBgColor(remote_game)]" v-for="remote_game in sorted_headers"
+              :key="remote_game.id">
               <div class="text-body-2" v-if="!isComplete(remote_game)">
                 <div v-if="gameState(remote_game) === 'pre'" class="d-flex flex-column">
                   <div class="score-wrapper">
@@ -53,8 +54,9 @@
                 </div>
                 <div v-else :class="['d-flex', 'flex-column', 'ma-2', 'font-weight-bold']">
                   <div class="score-wrapper">
-                    <div v-for="(homeAway,i) in ['away', 'home']" :key="i" class="d-flex justify-space-between">
-                      <div class="">{{ getTeam(remote_game, homeAway) ? getTeam(remote_game, homeAway).team.abbreviation : 'No Game' }}</div>
+                    <div v-for="(homeAway, i) in ['away', 'home']" :key="i" class="d-flex justify-space-between">
+                      <div class="">{{ getTeam(remote_game, homeAway) ? getTeam(remote_game, homeAway).team.abbreviation :
+                        'No Game' }}</div>
                       <div class="ml-2">{{ getScore(remote_game, homeAway) }}</div>
                     </div>
                   </div>
@@ -90,7 +92,8 @@
           <tr>
             <th class="text-left text-caption">
             </th>
-            <th v-if="szn_view && saved_games.length > 0 && !all_games_pre" class="text-center text-caption text-no-wrap">Szn</th>
+            <th v-if="szn_view && saved_games.length > 0 && !all_games_pre" class="text-center text-caption text-no-wrap">
+              Szn</th>
             <th class="text-center text-caption text-no-wrap">
               <div class="d-flex" v-if="!all_games_pre">
                 <div>Pts</div>
@@ -118,14 +121,17 @@
                 </div>
               </div>
             </th>
-            <th class="text-center text-caption text-no-wrap d-sm-none" v-if="szn_view && saved_games.length > 0 && !all_games_pre">
+            <th class="text-center text-caption text-no-wrap d-sm-none"
+              v-if="szn_view && saved_games.length > 0 && !all_games_pre">
               <div>Szn</div>
             </th>
-            <th class="text-center text-caption text-no-wrap d-sm-none" v-if="saved_games.length > 0 && !all_games_pre"></th>
+            <th class="text-center text-caption text-no-wrap d-sm-none" v-if="saved_games.length > 0 && !all_games_pre">
+            </th>
           </tr>
         </thead>
         <tbody class="pb-4">
-          <tr v-for="u in sorted_users" :key="u.id" :class="{'bg-blue-lighten-5': handleRowClass(u.id)}" @click="handleRowClick(u.id)">
+          <tr v-for="u in sorted_users" :key="u.id" :class="{ 'bg-blue-lighten-5': handleRowClass(u.id) }"
+            @click="handleRowClick(u.id)">
             <td>
               <div class="text-no-wrap d-flex justify-left align-center" v-if="u.email === user.email">
                 <Link :href="current_pick_url">{{ u.username }}</Link>
@@ -158,9 +164,11 @@
               </div>
             </td>
             <td v-for="remote_game in sorted_headers" :key="remote_game.id">
-              <div :class="['d-flex align-center justify-center mt-1', handleScoreClass(remote_game, u.id)]" v-if="!all_games_pre">
+              <div :class="['d-flex align-center justify-center mt-1', handleScoreClass(remote_game, u.id)]"
+                v-if="shouldShowPick(remote_game)">
                 <div class="team-pick">
-                  {{ getTeamPickFromRemote(remote_game, u.id) ? getTeamPickFromRemote(remote_game, u.id).team.abbreviation : 'No Pick' }}
+                  {{ getTeamPickFromRemote(remote_game, u.id) ? getTeamPickFromRemote(remote_game, u.id).team.abbreviation
+                    : 'No Pick' }}
                 </div>
                 <div class="ml-2 text-caption font-weight-bold">
                   {{ getConfidenceFromRemote(remote_game, u.id) | '' }}
@@ -178,7 +186,8 @@
                 </div>
               </div>
             </td>
-            <td v-if="szn_view && !all_games_pre" class="text-center text-no-wrap d-sm-none">{{ getSeasonPoints(u.id) }}</td>
+            <td v-if="szn_view && !all_games_pre" class="text-center text-no-wrap d-sm-none">{{ getSeasonPoints(u.id) }}
+            </td>
             <td class="d-sm-none" v-if="saved_games.length > 0">
               <div class="text-no-wrap d-flex justify-left align-center" v-if="u.email === user.email">
                 <Link :href="current_pick_url">{{ u.username }}</Link>
@@ -194,7 +203,7 @@
                 </div>
               </div>
             </td>
-            
+
           </tr>
         </tbody>
       </v-table>
@@ -218,7 +227,7 @@ export default {
     }, 60000);
     this.selected_calendar = this.week
     this.$store.commit('setMatchups', this.matchups)
-    this.$store.commit('setWeeklyPicks', []) 
+    this.$store.commit('setWeeklyPicks', [])
     if (this.saved_picks && this.saved_picks.length > 0) {
       this.saved_picks.forEach(pick => {
         if (!this.gameInConf(pick)) {
@@ -262,7 +271,7 @@ export default {
     },
     sorted_users() {
       let getPoints = this.szn_view ? 'getSeasonPoints' : 'getWeeklyPoints'
-      return this.users.sort((a,b) => this[getPoints](b.id) - this[getPoints](a.id))
+      return this.users.sort((a, b) => this[getPoints](b.id) - this[getPoints](a.id))
     },
     mappedGames() {
       if (this.saved_games) {
@@ -282,19 +291,33 @@ export default {
     headers() {
       return this.saved_games.map(g => this.matchups.events.find(e => e.id === g.remote_game_id.toString()))
     },
-    sorted_headers () {
-      return this.headers.sort((a,b) => this.findIndex(a.id) - this.findIndex(b.id))
+    sorted_headers() {
+      return this.headers.sort((a, b) => this.findIndex(a.id) - this.findIndex(b.id))
     },
-    all_pick_winners () {
+    all_pick_winners() {
       return this.all_picks.filter(p => p.winner).map(w => {
         let user = this.users.find(u => u.id === w.user_id)
         let game = this.all_games.find(g => g.id === w.game_id)
         let winner = game.home_team_id === w.remote_team_id ? game.home_team : game.away_team
-        return {user: user.username, game: game, pick: w, winner: winner}
+        return { user: user.username, game: game, pick: w, winner: winner }
       })
     }
   },
   methods: {
+    gameStarted(remote_game) {
+      return moment().isSameOrAfter(remote_game.competitions[0].date, 'minute');
+    },
+    shouldShowPick(remote_game) {
+      if (!this.all_games_pre) {
+        let isPostSeason = this.getSavedFromRemote(remote_game).week.split('_')[0] === 'post'
+        if (isPostSeason) {
+          return this.gameStarted(remote_game)
+        }
+        return true
+      }
+
+      return false
+    },
     refreshScores() {
       this.reloading = true
       this.reload().then(() => {
@@ -311,8 +334,8 @@ export default {
       let comps = game.competitions[0]
       return comps.broadcasts && comps.broadcasts[0] && comps.broadcasts[0].names ? comps.broadcasts[0].names[0] : ''
     },
-    findIndex (id) {
-      return this.matchups.events.findIndex(e=>e.id === id)
+    findIndex(id) {
+      return this.matchups.events.findIndex(e => e.id === id)
     },
     handleRowClass(id) {
       return this.rows_clicked.includes(id)
@@ -328,13 +351,13 @@ export default {
     getBroadcast(remote_game) {
       let comps = remote_game.competitions
       if (comps && comps.length > 0) {
-          let broadcasts = comps[0].broadcasts
-          if (broadcasts && broadcasts.length > 0) {
-            let names = broadcasts[0].names
-            if (names && names.length > 0) {
-              return names[0]
-            }
+        let broadcasts = comps[0].broadcasts
+        if (broadcasts && broadcasts.length > 0) {
+          let names = broadcasts[0].names
+          if (names && names.length > 0) {
+            return names[0]
           }
+        }
       }
       return ''
     },
@@ -377,18 +400,18 @@ export default {
     getSeasonPoints(user_id) {
       let winner_picks = this.all_picks.filter(p => p.user_id === user_id && p.winner).map(w => w.confidence)
       if (winner_picks.length > 0) {
-        return winner_picks.reduce((a,b) => a + b)
+        return winner_picks.reduce((a, b) => a + b)
       }
       return 0
     },
     getWeeklyPoints(user_id) {
       let all_picks = this.saved_picks.filter(p => p.user_id === user_id)
       let won_picks = all_picks.map(a => {
-        let cp = this.correctPick(this.getRemoteFromSaved(a),user_id)
+        let cp = this.correctPick(this.getRemoteFromSaved(a), user_id)
         return cp ? a.confidence : 0
       })
       if (won_picks.length > 0) {
-        return won_picks.reduce((a,b) => a + b)
+        return won_picks.reduce((a, b) => a + b)
       } else {
         return 0
       }
@@ -396,7 +419,7 @@ export default {
     getWeeklyMaxPoints(user_id) {
       let in_progress = this.saved_picks.filter(p => p.user_id === user_id && this.gamesNotComplete(p)).map(p => p.confidence)
       if (in_progress.length > 0) {
-        return in_progress.reduce((a,b) => a + b) + this.getWeeklyPoints(user_id)
+        return in_progress.reduce((a, b) => a + b) + this.getWeeklyPoints(user_id)
       } else {
         return 0
       }
