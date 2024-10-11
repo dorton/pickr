@@ -38,5 +38,7 @@ module Pickr
 
     # Don't generate system test files.
     config.generators.system_tests = nil
+    config.hosts << "pickr.dorton.dev"
+
   end
 end
