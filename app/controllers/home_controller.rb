@@ -30,7 +30,8 @@ class HomeController < ApplicationController
       current_group: @group.as_json(include: %i[managers users defaults]),
       user_groups: @user.groups.as_json(include: %i[managers users defaults]),
       current_calendar: @current_week,
-      calendars: @calendars
+      calendars: @calendars,
+      is_manager: @group.managers.include?(current_user)
     }
   end
 
@@ -79,7 +80,32 @@ class HomeController < ApplicationController
       current_group: @group.as_json(include: :managers),
       user_groups: @user.groups,
       current_calendar: @current_week,
-      calendars: @calendars
+      calendars: @calendars,
+      is_manager: @group.managers.include?(current_user)
+    }
+  end
+
+  def adminedit
+    @matchups = set_matchups(@week_value, @group.sport, @group.league)
+    @week_calendar = get_calendar_by_week_value(@week_value)
+    @saved_games = @group.games.where(week: @week_value)
+    user = User.find(params[:user_id])
+    game_check_or_update
+
+    render inertia: 'matchups/index', props: {
+      matchups: @matchups,
+      current_week: @current_week.value,
+      user:,
+      users: @group.users,
+      week: @week_value,
+      week_calendar: @week_calendar,
+      saved_picks: @group.picks.where(week: @week_value, user_id: user.id),
+      saved_games: @saved_games,
+      current_group: @group.as_json(include: :managers),
+      user_groups: user.groups,
+      current_calendar: @current_week,
+      calendars: @calendars,
+      is_manager: @group.managers.include?(current_user)
     }
   end
 

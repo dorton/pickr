@@ -5,7 +5,7 @@
         <Link href="/" class="main-header" as="text">{{ titleBarTitle }}</Link>
       </v-app-bar-title>
       <v-spacer></v-spacer>
-      <v-btn v-if="user.is_admin" icon @click="toggleAdminOverride">
+      <v-btn v-if="current_group && is_manager" icon @click="toggleAdminOverride">
         <v-icon>{{ admin_override_icon }}</v-icon>
       </v-btn>
       <v-menu v-if="user_groups.length > 1">
@@ -14,10 +14,7 @@
         </template>
 
         <v-list>
-          <v-list-item
-            v-for="(group, i) in user_groups"
-            :key="i"
-          >
+          <v-list-item v-for="(group, i) in dropDownSelections" :key="i">
             <v-list-item-title class="clicky-header" @click="changeGroups(group)">{{ group.name }}</v-list-item-title>
           </v-list-item>
         </v-list>
@@ -33,11 +30,18 @@
         </v-btn>
       </v-list-item>
       <v-list-item>
+        <v-btn block href="/manage/groups">
+          Settings
+        </v-btn>
+      </v-list-item>
+      <v-list-item>
         <v-btn block @click="signOut">
           Logout
         </v-btn>
       </v-list-item>
-      <AdminGames v-if="drawer && saved_games" :user="user" :week="week" :current_group="current_group" :current_calendar="current_calendar" :matchups="matchups" :saved_games="saved_games" :setting="setting" @set-theme="setTheme" />
+      <AdminGames v-if="drawer && saved_games" :user="user" :week="week" :current_group="current_group"
+        :current_calendar="current_calendar" :matchups="matchups" :saved_games="saved_games" :setting="setting"
+        @set-theme="setTheme" />
     </v-navigation-drawer>
     <v-main>
       <slot></slot>
@@ -65,7 +69,7 @@ export default {
       this.setTheme(this.setting.theme)
     }
   },
-  setup () {
+  setup() {
     const theme = useTheme()
 
     function setTheme(th) {
@@ -80,12 +84,15 @@ export default {
       drawer: false
     };
   },
-  props: ['matchups', 'user', 'saved_games', 'saved_picks', 'current_group', 'week', 'user_groups', 'current_calendar', 'week_calendar', 'setting'],
+  props: ['matchups', 'user', 'saved_games', 'saved_picks', 'current_group', 'week', 'user_groups', 'current_calendar', 'week_calendar', 'setting', 'is_manager'],
   computed: {
     ...mapState(['weekly_picks', 'weekly_games', 'admin_override', 'config']),
-    mobile () {
-        const { xs } = this.$vuetify.display
-        return xs
+    dropDownSelections() {
+      return [{ name: 'Manage Groups', slug: '/manage/groups' }, ...this.user_groups]
+    },
+    mobile() {
+      const { xs } = this.$vuetify.display
+      return xs
     },
     titleBarTitle() {
       return this.mobile ? 'SBP' : 'Sports Ball Pickr'
