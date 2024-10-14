@@ -34,9 +34,8 @@ export default {
   props: ['user', 'group', 'config'],
   methods: {
     removeFromGroup() {
-      let data = { user_id: this.user.id, group_id: this.group.id, group_slug: this.group.slug }
-      let url = '/removeuser'
-      axios.post(url, data, this.config).then(r => {
+      let url = `/groups/${this.group.slug}/group_users/${this.user.id}`
+      axios.delete(url, this.config).then(r => {
         if (r.status < 400) {
           this.dialog = false
           router.reload()

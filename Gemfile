@@ -4,6 +4,8 @@ ruby "3.2.2"
 
 gem "bootsnap", require: false
 
+gem "rubocop"
+
 gem "devise" 
 
 gem "httparty"
@@ -13,6 +15,10 @@ gem 'vite_rails'
 gem 'sidekiq'
 
 gem 'whenever', require: false
+
+gem 'administrate', '~> 0.20.1'
+
+gem 'sorbet'
 
 gem "inertia_rails", "~> 3.0"
 # Brings Rails named routes to modern javascript (https://github.com/elmassimo/js_from_routes)
@@ -39,6 +45,7 @@ group :development, :test do
 end
 
 group :development do
+  gem "pry"
   # Speed up commands on slow machines / big apps [https://github.com/rails/spring]
   # gem "spring"
 

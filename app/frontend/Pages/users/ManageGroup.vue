@@ -129,9 +129,11 @@ export default {
     },
     handleMakeManager(user) {
       console.log(user);
-      let data = { user: user, group: this.group  }
+      let data = { id: user.id  }
       console.log(data);
-      axios.post('/add-user-as-admin', data, this.config).then(r => {
+      axios.post(`/groups/${this.group.slug}/group_managers`, data, this.config).then(r => {
+        console.log(r.data);
+        
         if (r.status < 400) {
           router.reload()
         }
@@ -139,9 +141,9 @@ export default {
     },
     handleRemoveManager(user) {
       if (!this.last_manager_standing) {
-        let data = { user: user, group: this.group  }
+        let data = { user_id: user.id, group: this.group  }
         console.log(data);
-        axios.post('/remove-user-as-admin', data, this.config).then(r => {
+        axios.delete(`/groups/${this.group.slug}/group_managers/${user.id}`, this.config).then(r => {
           if (r.status < 400) {
             router.reload()
           }

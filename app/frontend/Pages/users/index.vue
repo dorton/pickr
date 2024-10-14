@@ -107,13 +107,19 @@ export default {
       const { smAndUp } = this.$vuetify.display
       return smAndUp ? 6 : 12
     },
+    slug() {
+      if (this.private_slug_id.length) {
+        return this.private_slug_id
+      }
+      return this.group_id ? this.groups.find(g => g.id === this.group_id).slug : null
+    }
   },
   methods: {
     default_tooltip_text(group) {
       return this.isGroupDefault(group) ? 'Default Group' : 'Make Default Group'
     },
     handleDefault(group) {
-      axios.patch(`/groups/${group.id}`, { group: { toggle_default: true, id: group.id } }, this.config).then(() => {
+      axios.patch(`/groups/${group.slug}`, { group: { toggle_default: true } }, this.config).then(() => {
         router.reload()
       })
     },
@@ -136,13 +142,12 @@ export default {
     },
     joinGroup() {
       if (!!this.group_id || !!this.private_slug_id) {
-        let data = { user_id: this.user.id, group_id: this.group_id, group_slug: this.private_slug_id }
-        let url = '/adduser'
+        let data = { id: this.user.id }
+        let url = `/groups/${this.slug}/group_users`
         axios.post(url, data, this.config).then(r => {
           if (r.status < 400) {
-            let slug = !!this.private_slug_id ? this.private_slug_id : this.groups.find(g => g.id === this.group_id).slug
-            if (slug) {
-              router.get(`/${slug}`)
+            if (this.slug) {
+              router.get(`/${this.slug}`)
             } else {
               router.reload()
             }
