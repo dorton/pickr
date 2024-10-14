@@ -1,24 +1,29 @@
-# README
+# Sportsball Pickr
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+Organize contests and play with your friends. Create a public pool that anyone can join, or a private one that only a select few join.
 
-Things you may want to cover:
+Currently choose between the following sports:
 
-* Ruby version
+* Football
 
-* System dependencies
+  * NFl
 
-* Configuration
+  * NCAA Football
 
-* Database creation
+Configure your pool to pick games against the spread and/or the over/under and include the post-season and/or bowls. 
 
-* Database initialization
+### Live scoring updates!
 
-* How to run the test suite
+## Try It Here
 
-* Services (job queues, cache servers, search engines, etc.)
+[https://pickr.dorton.dev](https://pickr.dorton.dev)
 
-* Deployment instructions
+## Or Run Locally
 
-* ...
+* git clone
+* bundle exec install
+* npm install
+* rails db:create
+* rails db:migrate
+* rails db:seed
+
