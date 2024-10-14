@@ -88,7 +88,7 @@ export default {
   computed: {
     ...mapState(['weekly_picks', 'weekly_games', 'admin_override', 'config']),
     dropDownSelections() {
-      return [{ name: 'Manage Groups', slug: '/manage/groups' }, ...this.user_groups]
+      return [{ name: 'Manage Groups', slug: 'manage/groups' }, ...this.user_groups]
     },
     mobile() {
       const { xs } = this.$vuetify.display

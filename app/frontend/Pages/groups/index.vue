@@ -5,8 +5,8 @@
         <div class="d-flex justify-center align-center">
           <div class="text-h4">{{ current_group.name }}</div>
           <div class="ml-2">
-            <v-btn v-if="mobile" :loading="reloading" @click="refreshScores()" color="transparent" flat icon="mdi-reload"
-              size="x-small"></v-btn>
+            <v-btn v-if="mobile" :loading="reloading" @click="refreshScores()" color="transparent" flat
+              icon="mdi-reload" size="x-small"></v-btn>
             <v-tooltip v-else location="right" text="refresh scores">
               <template v-slot:activator="{ props }">
                 <v-btn :loading="reloading" v-bind="props" @click="refreshScores()" color="transparent" flat
@@ -22,14 +22,14 @@
         </div>
       </v-col>
       <v-col class="d-none d-sm-flex">
-        <v-select hide-details density="compact" flat single-line :items="calendars" item-value="value" item-title="label"
-          v-model="selected_calendar" @update:modelValue="navToWeek"></v-select>
+        <v-select hide-details density="compact" flat single-line :items="calendars" item-value="value"
+          item-title="label" v-model="selected_calendar" @update:modelValue="navToWeek"></v-select>
       </v-col>
     </v-row>
     <v-row class="d-sm-none">
       <v-col>
-        <v-select hide-details density="compact" flat single-line :items="calendars" item-value="value" item-title="label"
-          v-model="selected_calendar" @update:modelValue="navToWeek"></v-select>
+        <v-select hide-details density="compact" flat single-line :items="calendars" item-value="value"
+          item-title="label" v-model="selected_calendar" @update:modelValue="navToWeek"></v-select>
       </v-col>
     </v-row>
     <v-row v-if="saved_games.length > 0">
@@ -55,7 +55,8 @@
                 <div v-else :class="['d-flex', 'flex-column', 'ma-2', 'font-weight-bold']">
                   <div class="score-wrapper">
                     <div v-for="(homeAway, i) in ['away', 'home']" :key="i" class="d-flex justify-space-between">
-                      <div class="">{{ getTeam(remote_game, homeAway) ? getTeam(remote_game, homeAway).team.abbreviation :
+                      <div class="">{{ getTeam(remote_game, homeAway) ? getTeam(remote_game, homeAway).team.abbreviation
+                        :
                         'No Game' }}</div>
                       <div class="ml-2">{{ getScore(remote_game, homeAway) }}</div>
                     </div>
@@ -70,11 +71,13 @@
                 <div class="d-flex flex-column">
                   <div class="score-wrapper">
                     <div class="d-flex justify-space-between">
-                      <div class="">{{ getTeam(remote_game, 'away') ? getTeam(remote_game, 'away').team.abbreviation : 'No Game' }}</div>
+                      <div class="">{{ getTeam(remote_game, 'away') ? getTeam(remote_game, 'away').team.abbreviation :
+                        'No Game' }}</div>
                       <div class="ml-2">{{ getScore(remote_game, 'away') }}</div>
                     </div>
                     <div class="d-flex justify-space-between">
-                      <div class="">{{ getTeam(remote_game, 'home') ? getTeam(remote_game, 'home').team.abbreviation : 'No Game' }}</div>
+                      <div class="">{{ getTeam(remote_game, 'home') ? getTeam(remote_game, 'home').team.abbreviation :
+                        'No Game' }}</div>
                       <div class="ml-2">{{ getScore(remote_game, 'home') }}</div>
                     </div>
                   </div>
@@ -92,7 +95,8 @@
           <tr>
             <th class="text-left text-caption">
             </th>
-            <th v-if="szn_view && saved_games.length > 0 && !all_games_pre" class="text-center text-caption text-no-wrap">
+            <th v-if="szn_view && saved_games.length > 0 && !all_games_pre"
+              class="text-center text-caption text-no-wrap">
               Szn</th>
             <th class="text-center text-caption text-no-wrap">
               <div class="d-flex" v-if="!all_games_pre">
@@ -167,8 +171,9 @@
               <div :class="['d-flex align-center justify-center mt-1', handleScoreClass(remote_game, u.id)]"
                 v-if="shouldShowPick(remote_game)">
                 <div class="team-pick">
-                  {{ getTeamPickFromRemote(remote_game, u.id) ? getTeamPickFromRemote(remote_game, u.id).team.abbreviation
-                    : 'No Pick' }}
+                  {{ getTeamPickFromRemote(remote_game, u.id) ? getTeamPickFromRemote(remote_game,
+                    u.id).team.abbreviation
+                  : 'No Pick' }}
                 </div>
                 <div class="ml-2 text-caption font-weight-bold">
                   {{ getConfidenceFromRemote(remote_game, u.id) | '' }}
@@ -209,7 +214,13 @@
       </v-table>
     </v-row>
     <v-row v-else class="align-center justify-center fill-height">
-      <div class="text-h4 text-center">Games For This Week Not Selected</div>
+      <div v-if="is_manager">
+        <div class="text-h4 text-center">Games For This Week Not Selected</div>
+        <div class="text-h6 text-center">To Select Games For The Week, Start By Clicking The Cog Button In The Top Right.</div>
+        <div class="text-h6 text-center">Now When You Unlock The Week, You Will See The Option To Add Or Remove As Many Games As Have Been Configured For This Pool.</div>
+        <div class="text-h6 text-center">Once You Have Added The Games, You Must Ensure That The Odds Are Saved. You Can Adjust To Your Team's Agreements.</div>
+      </div>
+      <div v-else class="text-h4 text-center">Games For This Week Not Selected</div>
     </v-row>
   </v-container>
 </template>
@@ -258,7 +269,7 @@ export default {
       reloading: false,
     };
   },
-  props: ['matchups', 'current_week', 'user', 'week', 'saved_picks', 'saved_games', 'current_group', 'users', 'user_groups', 'current_calendar', 'calendars', 'all_picks', 'all_games'],
+  props: ['matchups', 'current_week', 'user', 'week', 'saved_picks', 'saved_games', 'current_group', 'users', 'user_groups', 'current_calendar', 'calendars', 'all_picks', 'all_games', 'is_manager'],
   computed: {
     ...mapState(['weekly_picks', 'weekly_games', 'admin_override']),
     ...mapGetters(['all_games_pre', 'all_games_complete']),
