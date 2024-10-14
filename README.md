@@ -12,6 +12,8 @@ Currently choose between the following sports:
 
 Configure your pool to pick games against the spread and/or the over/under and include the post-season and/or bowls. 
 
+<sup>For Entertainment Purposes Only<sup>
+
 ### Live scoring updates!
 
 ## Try It Here
