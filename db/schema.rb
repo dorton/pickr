@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2023_11_27_014420) do
+ActiveRecord::Schema[7.1].define(version: 2025_08_23_161909) do
   create_table "calendars", force: :cascade do |t|
     t.string "label"
     t.string "alternateLabel"
@@ -24,6 +24,8 @@ ActiveRecord::Schema[7.1].define(version: 2023_11_27_014420) do
     t.boolean "regular_season", default: false
     t.string "league"
     t.string "sport"
+    t.integer "year"
+    t.index ["league", "sport", "year"], name: "index_calendars_on_league_and_sport_and_year"
   end
 
   create_table "games", force: :cascade do |t|

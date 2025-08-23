@@ -24,7 +24,7 @@ class GroupsController < ApplicationController
       if @user.group_defaults.empty?
         @group.defaults << @user
       end
-      
+
       render json: @group, status: :created, location: @group
     else
       render json: @group.errors, status: :unprocessable_entity
@@ -42,7 +42,7 @@ class GroupsController < ApplicationController
       end
       return
     end
-    
+
     if @group.update(group_params)
       render json: @group
     else

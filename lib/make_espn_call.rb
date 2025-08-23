@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module MakeEspnCall
   include HTTParty
   def get_scores

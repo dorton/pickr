@@ -4,11 +4,11 @@ class GroupManagersController < ApplicationController
   before_action :authorize_group_manager!
 
   def create
-    unless @group.managers.include?(@user)
+    if @group.managers.include?(@user)
+      render json: { status: :unprocessable_entity, message: 'User is already a manager.' }, status: :unprocessable_entity
+    else
       @group.managers << @user
       render json: { status: :success, message: 'User added as a manager.' }, status: :created
-    else
-      render json: { status: :unprocessable_entity, message: 'User is already a manager.' }, status: :unprocessable_entity
     end
   end
 

@@ -1,6 +1,8 @@
 class Calendar < ApplicationRecord
   has_many :games, dependent: :destroy
 
+  validates :value, uniqueness: { scope: [:league, :sport, :year] }, allow_nil: true
+
   def self.get_all_calendars(group = nil)
     if group
       where(sport: group.sport, league: group.league)
