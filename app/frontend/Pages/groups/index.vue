@@ -503,10 +503,15 @@ export default {
       }
     },
     getFavoredTeam(remote_game) {
-      let remote_team_id = this.getSavedFromRemote(remote_game).favored_team_id
+      let saved_game = this.getSavedFromRemote(remote_game)
+      if (!saved_game || !saved_game.favored_team_id) {
+        return null
+      }
+      let remote_team_id = saved_game.favored_team_id
       if (remote_team_id) {
         return this.getRemoteTeamFromId(remote_game, remote_team_id)
       }
+      return null
     },
     getSavedPickFromRemoteGame(remote_game_id, user_id) {
       return this.saved_picks.find(s => s.remote_game_id.toString() === remote_game_id && s.user_id === user_id)
