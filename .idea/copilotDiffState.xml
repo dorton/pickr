@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CopilotDiffPersistence">
+    <option name="pendingDiffs">
+      <map>
+        <entry key="$PROJECT_DIR$/app/models/calendar.rb">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/app/models/calendar.rb" />
+              <option name="originalContent" value="class Calendar &lt; ApplicationRecord&#10;  has_many :games, dependent: :destroy&#10;&#10;  def self.get_all_calendars(group = nil)&#10;    if group&#10;      where(sport: group.sport, league: group.league)&#10;    else&#10;      where(sport: 'football')&#10;    end&#10;  end&#10;&#10;  def self.get_calendar_by_week_value(week_value)&#10;    get_all_calendars.find_by(value: week_value)&#10;  end&#10;&#10;  def self.current_week(group = nil, week_id = nil)&#10;    if week_id.nil?&#10;      get_all_calendars(group).where('? BETWEEN startDate AND endDate', Time.current).first&#10;    else&#10;      get_all_calendars(group).find_by_value(week_id)&#10;    end&#10;  end&#10;end&#10;" />
+              <option name="updatedContent" value="class Calendar &lt; ApplicationRecord&#10;  has_many :games, dependent: :destroy&#10;  &#10;  validates :value, uniqueness: { scope: [:league, :sport, :year] }, allow_nil: true&#10;&#10;  def self.get_all_calendars(group = nil)&#10;    if group&#10;      where(sport: group.sport, league: group.league)&#10;    else&#10;      where(sport: 'football')&#10;    end&#10;  end&#10;&#10;  def self.get_calendar_by_week_value(week_value)&#10;    get_all_calendars.find_by(value: week_value)&#10;  end&#10;&#10;  def self.current_week(group = nil, week_id = nil)&#10;    if week_id.nil?&#10;      get_all_calendars(group).where('? BETWEEN startDate AND endDate', Time.current).first&#10;    else&#10;      get_all_calendars(group).find_by_value(week_id)&#10;    end&#10;  end&#10;end" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>
