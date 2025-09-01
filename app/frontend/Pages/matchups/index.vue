@@ -74,7 +74,7 @@ import TeamPickLine from './TeamPickLine.vue'
 import { mapState } from 'vuex'
 import { router } from '@inertiajs/vue3'
 export default {
-  props: ['matchups', 'user', 'week', 'year', 'current_group', 'current_week', 'users', 'saved_games', 'saved_picks', 'calendars', 'current_calendar',],
+  props: ['matchups', 'user', 'week', 'current_group', 'current_week', 'users', 'saved_games', 'saved_picks', 'calendars', 'current_calendar',],
   components: {
     Link,
     TeamPickLine,
@@ -142,10 +142,10 @@ export default {
       return this.weekly_games.sort((a, b) => this.findIndex(a.id) - this.findIndex(b.id))
     },
     group_url() {
-      return `/${this.current_group.slug}/${this.year}/${this.selected_calendar}`
+      return `/${this.current_group.slug}/${this.selected_calendar}`
     },
     pick_url() {
-      return `/${this.current_group.slug}/${this.year}/${this.selected_calendar}/picks`
+      return `/${this.current_group.slug}/${this.selected_calendar}/picks`
     },
     getCalendarDetail() {
       if (this.calendars && !!this.selected_calendar) {
@@ -219,7 +219,7 @@ export default {
     navWeeks(direction) {
       let diff = direction === 'back' ? -1 : 1
       let week = parseInt(this.handleWeek.split('_')[0]) + diff
-      return `/${this.current_group.slug}/${this.year}/${week}/picks`
+      return `/${this.current_group.slug}/${week}/picks`
     },
     currentOdds(matchup) {
       let comps = matchup.competitions
