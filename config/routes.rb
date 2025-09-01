@@ -27,9 +27,9 @@ Rails.application.routes.draw do
   resources :matchups
   get 'manage/groups', to: 'home#manage_groups', as: 'manage_groups'
   get ':group_slug', to: 'home#group', as: 'grouphome'
-  get ':group_slug/:week_id', to: 'home#index', as: 'groupweekhome'
-  get ':group_slug/:week_id/picks', to: 'home#show'
-  get ':group_slug/:week_id/picks/:user_id', to: 'home#adminedit', as: 'adminedit'
+  get ':group_slug/:year/:week_id', to: 'home#index', as: 'groupweekhome'
+  get ':group_slug/:year/:week_id/picks', to: 'home#show'
+  get ':group_slug/:year/:week_id/picks/:user_id', to: 'home#adminedit', as: 'adminedit'
 
   get 'up' => 'rails/health#show', as: :rails_health_check
 
