@@ -56,13 +56,13 @@ class GroupsController < ApplicationController
   end
 
   private
-  # Use callbacks to share common setup or constraints between actions.
-  def set_group
-    @group = Group.find_by_slug(params[:slug])
-  end
+    # Use callbacks to share common setup or constraints between actions.
+    def set_group
+      @group = Group.find_by_slug(params[:slug])
+    end
 
-  # Only allow a list of trusted parameters through.
-  def group_params
-    params.require(:group).permit(:name, :user_id, :slug, :is_private, :league, :sport, :regular_season, :post_season, :max_picks, :spread, :over_under)
-  end
+    # Only allow a list of trusted parameters through.
+    def group_params
+      params.require(:group).permit(:name, :user_id, :slug, :is_private, :league, :sport, :regular_season, :post_season, :max_picks, :spread, :over_under)
+    end
 end
