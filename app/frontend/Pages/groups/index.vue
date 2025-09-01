@@ -22,13 +22,13 @@
         </div>
       </v-col>
       <v-col class="d-none d-sm-flex">
-        <v-select hide-details density="compact" flat single-line :items="calendars" item-value="value"
+        <v-select hide-details density="compact" flat single-line :items="filteredCalendars" item-value="value"
           item-title="label" v-model="selected_calendar" @update:modelValue="navToWeek"></v-select>
       </v-col>
     </v-row>
     <v-row class="d-sm-none">
       <v-col>
-        <v-select hide-details density="compact" flat single-line :items="calendars" item-value="value"
+        <v-select hide-details density="compact" flat single-line :items="filteredCalendars" item-value="value"
           item-title="label" v-model="selected_calendar" @update:modelValue="navToWeek"></v-select>
       </v-col>
     </v-row>
@@ -176,7 +176,7 @@
                   : 'No Pick' }}
                 </div>
                 <div class="ml-2 text-caption font-weight-bold">
-                  {{ getConfidenceFromRemote(remote_game, u.id) | '' }}
+                  {{ getConfidenceFromRemote(remote_game, u.id) || '' }}
                 </div>
               </div>
             </td>
@@ -269,13 +269,20 @@ export default {
       reloading: false,
     };
   },
-  props: ['matchups', 'current_week', 'user', 'week', 'saved_picks', 'saved_games', 'current_group', 'users', 'user_groups', 'current_calendar', 'calendars', 'all_picks', 'all_games', 'is_manager'],
+  props: ['matchups', 'current_week', 'user', 'week', 'year', 'saved_picks', 'saved_games', 'current_group', 'users', 'user_groups', 'current_calendar', 'calendars', 'all_picks', 'all_games', 'is_manager'],
   computed: {
     ...mapState(['weekly_picks', 'weekly_games', 'admin_override']),
     ...mapGetters(['all_games_pre', 'all_games_complete']),
     mobile() {
       const { xs } = this.$vuetify.display
       return xs
+    },
+    // Filter calendars to only show ones for the current year
+    filteredCalendars() {
+      if (this.calendars && this.year && this.current_group) {
+        return this.calendars.filter(calendar => calendar.year === this.year && this.current_group.league === calendar.league)
+      }
+      return this.calendars || []
     },
     szn_text() {
       return this.szn_view ? 'Week View' : 'Season View'
@@ -292,12 +299,13 @@ export default {
     },
     getCalendarDetail() {
       if (this.calendars && !!this.selected_calendar) {
-        return this.calendars.find(c => c.value === this.selected_calendar).detail
+        const calendar = this.calendars.find(c => c.value === this.selected_calendar)
+        return calendar ? calendar.detail : ''
       }
       return ''
     },
     current_pick_url() {
-      return `/${this.current_group.slug}/${this.week}/picks`
+      return `/${this.current_group.slug}/${this.year}/${this.week}/picks`
     },
     headers() {
       return this.saved_games.map(g => this.matchups.events.find(e => e.id === g.remote_game_id.toString()))
@@ -373,7 +381,7 @@ export default {
       return ''
     },
     admin_edit_url(id) {
-      return `/${this.current_group.slug}/${this.week}/picks/${id}`
+      return `/${this.current_group.slug}/${this.year}/${this.week}/picks/${id}`
     },
     handleBgColor(remote_game) {
       if (this.gameState(remote_game) === 'in') {
@@ -482,7 +490,7 @@ export default {
       return this.getTeam(remote_game, homeAway).score
     },
     navToWeek() {
-      let url = `/${this.current_group.slug}/${this.selected_calendar}`
+      let url = `/${this.current_group.slug}/${this.year}/${this.selected_calendar}`
       router.get(url)
     },
     getSavedFromRemote(remote_game) {
