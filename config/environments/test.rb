@@ -34,6 +34,9 @@ Rails.application.configure do
   # Disable request forgery protection in test environment.
   config.action_controller.allow_forgery_protection = false
 
+  # Allow default test host to avoid HostAuthorization 403s
+  config.hosts << "www.example.com"
+
   # Print deprecation notices to the stderr.
   config.active_support.deprecation = :stderr
 

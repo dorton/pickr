@@ -9,4 +9,19 @@ class Group < ApplicationRecord
   has_many :games, through: :group_games
   has_many :group_picks, dependent: :destroy
   has_many :picks, through: :group_picks
+
+  after_commit :ensure_season_calendar, on: :create
+
+  private
+
+  def ensure_season_calendar
+    sport = self.sport.presence || 'football'
+    league = self.league.presence || 'college-football'
+    current_year = Time.zone.now.year
+    unless Calendar.exists?(sport: sport, league: league, year: current_year)
+      NewSeasonSetup.call(sport: sport, league: league)
+    end
+  rescue => e
+    Rails.logger.error("NewSeasonSetup failed for Group##{id} creation: #{e.class} - #{e.message}")
+  end
 end
