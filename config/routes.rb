@@ -25,6 +25,9 @@ Rails.application.routes.draw do
   resources :games
   devise_for :users
   resources :matchups
+  namespace :api do
+    resources :games, only: %i[index]
+  end
   get 'manage/groups', to: 'home#manage_groups', as: 'manage_groups'
   get ':group_slug', to: 'home#group', as: 'grouphome'
   get ':group_slug/:week_id', to: 'home#index', as: 'groupweekhome'

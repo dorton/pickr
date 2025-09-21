@@ -3,8 +3,8 @@ class EspnScores < ApplicationService
 
   def initialize(week_slug='week_1', sport = 'football', league = 'college-football')
     @week_slug = week_slug
-    @week_type = @week_slug.split('_').first
-    @week_value = @week_slug.split('_').last
+    @week_type = @week_slug&.split('_')&.first
+    @week_value = @week_slug&.split('_')&.last
     @sport = sport
     @league = league
   end

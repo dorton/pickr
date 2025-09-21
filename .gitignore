@@ -45,3 +45,6 @@ node_modules
 /sorbet
 /start_servers.sh
 /stop_servers.sh
+.idea
+.vscode
+.DS_Store
